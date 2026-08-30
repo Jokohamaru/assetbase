@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
 	"github.com/Jokohamaru/assetbase/pkg/response"
@@ -15,13 +16,46 @@ func NewAdminHandler() *AdminHandler {
 	return &AdminHandler{}
 }
 
+// userResponse is a safe view of db.UserModel that omits passwordHash.
+type userResponse struct {
+	ID                 string    `json:"id"`
+	EmployeeCode       string    `json:"employeeCode"`
+	Username           string    `json:"username"`
+	FullName           string    `json:"fullName"`
+	Email              string    `json:"email"`
+	Role               string    `json:"role"`
+	Status             string    `json:"status"`
+	MustChangePassword bool      `json:"mustChangePassword"`
+	CreatedAt          time.Time `json:"createdAt"`
+	UpdatedAt          time.Time `json:"updatedAt"`
+}
+
+func toUserResponse(u db.UserModel) userResponse {
+	return userResponse{
+		ID:                 u.ID,
+		EmployeeCode:       u.EmployeeCode,
+		Username:           u.Username,
+		FullName:           u.FullName,
+		Email:              u.Email,
+		Role:               string(u.Role),
+		Status:             string(u.Status),
+		MustChangePassword: u.MustChangePassword,
+		CreatedAt:          u.CreatedAt,
+		UpdatedAt:          u.UpdatedAt,
+	}
+}
+
 func (h *AdminHandler) ListUsers(c *gin.Context) {
 	users, err := database.Client.User.FindMany().Exec(c.Request.Context())
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response.Success(c, users)
+	result := make([]userResponse, len(users))
+	for i, u := range users {
+		result[i] = toUserResponse(u)
+	}
+	response.Success(c, result)
 }
 
 func (h *AdminHandler) CreateUser(c *gin.Context) {
@@ -55,5 +89,33 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response.Success(c, user)
+	response.Success(c, toUserResponse(*user))
+}
+
+func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Status string `json:"status" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	status := db.RecordStatusActive
+	if req.Status == string(db.RecordStatusInactive) {
+		status = db.RecordStatusInactive
+	}
+
+	user, err := database.Client.User.FindUnique(
+		db.User.ID.Equals(id),
+	).Update(
+		db.User.Status.Set(status),
+	).Exec(c.Request.Context())
+
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, toUserResponse(*user))
 }

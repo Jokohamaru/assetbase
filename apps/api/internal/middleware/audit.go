@@ -78,13 +78,10 @@ func Audit() gin.HandlerFunc {
 		// Note: error ignoring is fine here to not interrupt response
 		if actorID != nil {
 			database.Client.AuditLog.CreateOne(
-				db.AuditLog.Action.Set(action),
+				db.AuditLog.Action.Set(action+" ["+statusStr+"]"),
 				db.AuditLog.EntityType.Set(entityType),
-				db.AuditLog.EntityID.Set("N/A"),
-				db.AuditLog.Status.Set(statusStr),
-				db.AuditLog.User.Link(db.User.ID.Equals(*actorID)),
-				db.AuditLog.Details.Set("Request: " + reqBodyStr + " | Response: " + details),
-				db.AuditLog.IpAddress.Set(c.ClientIP()),
+				db.AuditLog.UserID.Set(*actorID),
+				db.AuditLog.IPAddress.Set(c.ClientIP()),
 			).Exec(context.Background())
 		}
 	}

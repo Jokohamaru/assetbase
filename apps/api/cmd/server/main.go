@@ -60,6 +60,12 @@ func main() {
 	masterDataHandler := handler.NewMasterDataHandler(masterDataService)
 	
 	adminHandler := handler.NewAdminHandler()
+	
+	assetService := service.NewAssetService()
+	assetHandler := handler.NewAssetHandler(assetService)
+	
+	lifecycleService := service.NewLifecycleService()
+	lifecycleHandler := handler.NewLifecycleHandler(lifecycleService)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -74,6 +80,17 @@ func main() {
 			protected.GET("/auth/me", authHandler.GetMe)
 			protected.PUT("/auth/password", authHandler.ChangePassword)
 			
+			// Asset routes
+			assets := protected.Group("/assets")
+			{
+				assets.GET("", assetHandler.ListAssets)
+				assets.GET("/:id", assetHandler.GetAsset)
+				assets.POST("", assetHandler.CreateAsset)
+				
+				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
+				assets.POST("/:id/transfer", lifecycleHandler.TransferAsset)
+			}
+			
 			// Admin routes
 			admin := protected.Group("/admin")
 			admin.Use(middleware.RequireRole("ADMIN"))
@@ -87,8 +104,20 @@ func main() {
 				admin.GET("/categories", masterDataHandler.ListCategories)
 				admin.POST("/categories", masterDataHandler.CreateCategory)
 				
+				admin.GET("/manufacturers", masterDataHandler.ListManufacturers)
+				admin.POST("/manufacturers", masterDataHandler.CreateManufacturer)
+				
+				admin.GET("/models", masterDataHandler.ListModels)
+				admin.POST("/models", masterDataHandler.CreateModel)
+				
+				admin.GET("/warehouses", masterDataHandler.ListWarehouses)
+				admin.POST("/warehouses", masterDataHandler.CreateWarehouse)
+				
+				admin.GET("/asset-statuses", masterDataHandler.ListAssetStatuses)
+				
 				admin.GET("/users", adminHandler.ListUsers)
 				admin.POST("/users", adminHandler.CreateUser)
+				admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
 			}
 		}
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/Jokohamaru/assetbase/internal/database"
 	"github.com/Jokohamaru/assetbase/pkg/response"
+	"github.com/Jokohamaru/assetbase/prisma/db"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,9 +26,9 @@ func Auth() gin.HandlerFunc {
 		hashStr := hex.EncodeToString(hash[:])
 
 		session, err := database.Client.AuthSession.FindUnique(
-			database.Client.AuthSession.TokenHash.Equals(hashStr),
+			db.AuthSession.TokenHash.Equals(hashStr),
 		).With(
-			database.Client.AuthSession.User.Fetch(),
+			db.AuthSession.User.Fetch(),
 		).Exec(context.Background())
 
 		if err != nil || session == nil {
@@ -36,7 +37,8 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		if session.ExpiresAt.Before(time.Now()) || session.RevokedAt != nil {
+		_, isRevoked := session.RevokedAt()
+		if session.ExpiresAt.Before(time.Now()) || isRevoked {
 			response.Error(c, http.StatusUnauthorized, "Unauthorized: session expired or revoked")
 			c.Abort()
 			return

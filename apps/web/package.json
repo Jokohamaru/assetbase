@@ -28,8 +28,10 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "latest"
   }

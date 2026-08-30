@@ -1,3 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-purple: #6653df;
+  --color-brand-purple-hover: #5945d4;
+  --color-brand-purple-light: #f0edff;
+  --color-border-light: #e8e8ef;
+  --color-muted-text: #767789;
+  --color-bg-app: #f5f6fa;
+}
+
 :root {
   font-family: Manrope, system-ui, sans-serif;
   color: #20202a;

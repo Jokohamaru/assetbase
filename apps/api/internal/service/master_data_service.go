@@ -81,8 +81,39 @@ func (s *MasterDataService) ListModels(ctx context.Context) ([]db.ProductModelMo
 
 func (s *MasterDataService) CreateModel(ctx context.Context, name, categoryId, manufacturerId string) (*db.ProductModelModel, error) {
 	return database.Client.ProductModel.CreateOne(
-		db.ProductModel.Name.Set(name),
 		db.ProductModel.Category.Link(db.AssetCategory.ID.Equals(categoryId)),
 		db.ProductModel.Manufacturer.Link(db.Manufacturer.ID.Equals(manufacturerId)),
+		db.ProductModel.Name.Set(name),
+	).Exec(ctx)
+}
+
+// Warehouses
+func (s *MasterDataService) ListWarehouses(ctx context.Context) ([]db.WarehouseModel, error) {
+	return database.Client.Warehouse.FindMany(
+		db.Warehouse.Status.Equals(db.RecordStatusActive),
+	).With(
+		db.Warehouse.Location.Fetch(),
+	).Exec(ctx)
+}
+
+func (s *MasterDataService) CreateWarehouse(ctx context.Context, code, name string, locationId *string, description string) (*db.WarehouseModel, error) {
+	var ops []db.WarehouseSetParam
+	if locationId != nil {
+		ops = append(ops, db.Warehouse.Location.Link(db.Location.ID.Equals(*locationId)))
+	}
+	if description != "" {
+		ops = append(ops, db.Warehouse.Description.Set(description))
+	}
+	return database.Client.Warehouse.CreateOne(
+		db.Warehouse.Code.Set(code),
+		db.Warehouse.Name.Set(name),
+		ops...,
+	).Exec(ctx)
+}
+
+// AssetStatuses
+func (s *MasterDataService) ListAssetStatuses(ctx context.Context) ([]db.AssetStatusModel, error) {
+	return database.Client.AssetStatus.FindMany().OrderBy(
+		db.AssetStatus.SortOrder.Order(db.SortOrderAsc),
 	).Exec(ctx)
 }
