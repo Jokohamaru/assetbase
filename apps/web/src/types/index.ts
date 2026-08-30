@@ -97,3 +97,78 @@ export interface AppUser {
   departmentScope: string[]
   mustChangePassword?: boolean
 }
+
+export interface InventorySession {
+  id: string;
+  inventoryNo: string;
+  name: string;
+  status: 'OPEN' | 'CLOSED' | 'CANCELLED';
+  scopeDepartmentId?: string;
+  scopeLocationId?: string;
+  scopeWarehouseId?: string;
+  scopeCategoryId?: string;
+  startedAt: string;
+  closedAt?: string;
+  createdBy: string;
+  items?: InventoryItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  sessionId: string;
+  assetId: string;
+  asset?: Asset;
+  expectedLocationId?: string;
+  expectedCustodianId?: string;
+  observedLocationId?: string;
+  observedCustodianId?: string;
+  scannedAt?: string;
+  scannedBy?: string;
+  result: 'PENDING' | 'MATCHED' | 'MISSING' | 'UNEXPECTED' | 'LOCATION_MISMATCH';
+  note?: string;
+}
+
+export interface ImportRowError {
+  field: string;
+  message: string;
+}
+
+export interface ImportAssetRow {
+  assetTag: string;
+  name: string;
+  serialNumber?: string;
+  barcode?: string;
+  categoryCode: string;
+  modelName?: string;
+  manufacturerName?: string;
+  departmentCode?: string;
+  locationCode?: string;
+  warehouseCode?: string;
+  statusCode: string;
+  purchaseCost?: number;
+  purchaseDate?: string;
+  warrantyExpiryDate?: string;
+}
+
+export interface AssetImportBatch {
+  id: string;
+  sourceFileName: string;
+  status: 'STAGED' | 'COMMITTED' | 'ROLLED_BACK' | 'ROLLBACK_FAILED';
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  committedRows: number;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface AssetImportRow {
+  id: string;
+  batchId: string;
+  rowNumber: number;
+  payload: ImportAssetRow;
+  status: 'PENDING' | 'VALID' | 'INVALID' | 'COMMITTED';
+  errors: ImportRowError[];
+}

@@ -70,6 +70,12 @@ func main() {
 	historyService := service.NewHistoryService()
 	historyHandler := handler.NewHistoryHandler(historyService)
 
+	inventoryService := service.NewInventoryService()
+	inventoryHandler := handler.NewInventoryHandler(inventoryService)
+
+	importService := service.NewImportService()
+	importHandler := handler.NewImportHandler(importService)
+
 	v1 := r.Group("/api/v1")
 	{
 		// Public routes
@@ -94,6 +100,27 @@ func main() {
 				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
 				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)
 				assets.POST("/:id/transfer", lifecycleHandler.TransferAsset)
+			}
+			
+			// Inventory routes
+			inventories := protected.Group("/inventories")
+			{
+				inventories.GET("", inventoryHandler.ListSessions)
+				inventories.GET("/:id", inventoryHandler.GetSession)
+				inventories.POST("", inventoryHandler.CreateSession)
+				inventories.POST("/:id/scan", inventoryHandler.ScanItem)
+				inventories.PUT("/:id/close", inventoryHandler.CloseSession)
+			}
+			
+			// Import routes
+			imports := protected.Group("/imports")
+			{
+				imports.GET("", importHandler.ListBatches)
+				imports.GET("/:id", importHandler.GetBatch)
+				imports.GET("/:id/rows", importHandler.GetBatchRows)
+				imports.POST("/upload", importHandler.UploadFile)
+				imports.POST("/:id/commit", importHandler.CommitBatch)
+				imports.POST("/:id/rollback", importHandler.RollbackBatch)
 			}
 			
 			// Admin routes

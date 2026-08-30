@@ -9,6 +9,7 @@ import { useDepartments } from '../../hooks/useMasterData';
 import { AddAssetModal } from './components/AddAssetModal';
 import { AssignAssetModal } from './components/AssignAssetModal';
 import { ReturnAssetModal } from './components/ReturnAssetModal';
+import { BarcodePrintModal } from '../scanner/BarcodePrintModal';
 import { Asset } from '../../types';
 
 export function AssetBookPage() {
@@ -20,6 +21,7 @@ export function AssetBookPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedAssetForAssign, setSelectedAssetForAssign] = useState<Asset | null>(null);
   const [selectedAssetForReturn, setSelectedAssetForReturn] = useState<Asset | null>(null);
+  const [selectedAssetForBarcode, setSelectedAssetForBarcode] = useState<Asset | null>(null);
 
   const { data: assets = [], isLoading } = useAssets({
     category: activeTab === 'all' ? undefined : activeTab,
@@ -268,7 +270,13 @@ export function AssetBookPage() {
                             <UserPlus size={16} />
                           </button>
                         )}
-                        <button className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="In Barcode / QR"><QrCode size={16} /></button>
+                        <button 
+                          onClick={() => setSelectedAssetForBarcode(a)}
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" 
+                          title="In Barcode / QR"
+                        >
+                          <QrCode size={16} />
+                        </button>
                         <button className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="Sửa"><Pencil size={16} /></button>
                         <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Xóa"><Trash2 size={16} /></button>
                       </div>
@@ -304,11 +312,20 @@ export function AssetBookPage() {
         asset={selectedAssetForAssign}
         onClose={() => setSelectedAssetForAssign(null)} 
       />
-      <ReturnAssetModal 
-        isOpen={selectedAssetForReturn !== null} 
-        asset={selectedAssetForReturn}
-        onClose={() => setSelectedAssetForReturn(null)} 
-      />
+      {selectedAssetForReturn && (
+        <ReturnAssetModal 
+          isOpen={true}
+          asset={selectedAssetForReturn} 
+          onClose={() => setSelectedAssetForReturn(null)} 
+        />
+      )}
+
+      {selectedAssetForBarcode && (
+        <BarcodePrintModal 
+          asset={selectedAssetForBarcode} 
+          onClose={() => setSelectedAssetForBarcode(null)} 
+        />
+      )}
     </div>
   );
 }
