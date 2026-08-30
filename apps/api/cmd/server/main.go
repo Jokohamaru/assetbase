@@ -66,6 +66,9 @@ func main() {
 	
 	lifecycleService := service.NewLifecycleService()
 	lifecycleHandler := handler.NewLifecycleHandler(lifecycleService)
+	
+	historyService := service.NewHistoryService()
+	historyHandler := handler.NewHistoryHandler(historyService)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -79,6 +82,7 @@ func main() {
 		{
 			protected.GET("/auth/me", authHandler.GetMe)
 			protected.PUT("/auth/password", authHandler.ChangePassword)
+			protected.GET("/history", historyHandler.ListHistory)
 			
 			// Asset routes
 			assets := protected.Group("/assets")
@@ -88,6 +92,7 @@ func main() {
 				assets.POST("", assetHandler.CreateAsset)
 				
 				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
+				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)
 				assets.POST("/:id/transfer", lifecycleHandler.TransferAsset)
 			}
 			

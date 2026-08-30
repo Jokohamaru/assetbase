@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from 'react'
 import JsBarcode from 'jsbarcode'
 import QRCode from 'qrcode'

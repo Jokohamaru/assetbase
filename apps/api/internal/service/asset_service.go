@@ -35,7 +35,11 @@ func (s *AssetService) GetAssetByID(ctx context.Context, id string) (*db.AssetMo
 		db.Asset.Model.Fetch(),
 		db.Asset.Manufacturer.Fetch(),
 		db.Asset.Status.Fetch(),
-		db.Asset.Histories.Fetch().OrderBy(db.AssetHistory.CreatedAt.Order(db.SortOrderDesc)),
+		db.Asset.Histories.Fetch().With(
+			db.AssetHistory.Actor.Fetch(),
+			db.AssetHistory.FromLocation.Fetch(),
+			db.AssetHistory.ToLocation.Fetch(),
+		).OrderBy(db.AssetHistory.CreatedAt.Order(db.SortOrderDesc)),
 	).Exec(ctx)
 
 	if err != nil {

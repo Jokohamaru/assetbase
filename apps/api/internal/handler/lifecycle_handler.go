@@ -34,6 +34,23 @@ func (h *LifecycleHandler) AssignAsset(c *gin.Context) {
 	response.Success(c, data)
 }
 
+func (h *LifecycleHandler) ReturnAsset(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.ReturnAssetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	userID, _ := c.Get("userID")
+	data, err := h.Service.ReturnAsset(c.Request.Context(), id, userID.(string), req)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, data)
+}
+
 func (h *LifecycleHandler) TransferAsset(c *gin.Context) {
 	id := c.Param("id")
 	var req dto.TransferAssetRequest

@@ -1,34 +1,29 @@
 export type AssetStatus = 'Đang sử dụng' | 'Sẵn sàng' | 'Bảo trì' | 'Hỏng'
 
 export interface Asset {
-  id: number
-  apiId?: string
-  code: string
-  barcode?: string
-  qrCode?: string
-  name: string
-  category: string
-  serial: string
-  department: string
-  location: string
-  assignedTo: string
-  purchaseDate: string
-  purchaseCost: number
-  status: AssetStatus
-  icon: string
-  condition?: 'Tốt' | 'Trầy xước nhẹ' | 'Cần kiểm tra' | 'Hỏng'
-  dueDate?: string
-  recipientEmail?: string
-  assignmentType?: 'Cấp phát' | 'Cho mượn'
-  manufacturer?: string
-  model?: string
-  cpu?: string
-  ram?: string
-  storage?: string
-  operatingSystem?: string
-  ipAddress?: string
-  macAddress?: string
-  imageDataUrl?: string
+  id: string;
+  assetTag: string;
+  name: string;
+  serialNumber?: string;
+  barcode?: string;
+  categoryId: string;
+  modelId?: string;
+  manufacturerId?: string;
+  statusId: string;
+  assignedUserId?: string;
+  currentCustodianId?: string;
+  departmentId?: string;
+  locationId?: string;
+  warehouseId?: string;
+  purchaseCost?: number;
+  purchaseDate?: string;
+  
+  // Relations (optional for partial updates)
+  category?: any;
+  status?: any;
+  department?: any;
+  location?: any;
+  currentCustodian?: any;
 }
 
 export type TransactionType = 'Nhập kho' | 'Cấp phát' | 'Cho mượn' | 'Thu hồi' | 'Điều chuyển'

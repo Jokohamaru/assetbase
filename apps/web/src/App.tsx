@@ -5,6 +5,7 @@ import { LoginScreen } from './features/auth/LoginScreen';
 import { MasterDataPage } from './features/master-data/MasterDataPage';
 import { DashboardPage } from './features/dashboard/DashboardPage';
 import { AssetBookPage } from './features/assets/AssetBookPage';
+import { TransactionHistoryPage } from './features/reports/TransactionHistoryPage';
 import type { AppUser, BrandingSettings } from './types';
 
 export default function App() {
@@ -22,20 +23,31 @@ export default function App() {
     logoDataUrl: ''
   };
 
-  const handleLogin = async (username: string) => {
-    // Mock login for now until API is wired up
-    setCurrentUser({
-      id: 1,
-      username,
-      name: 'Admin User',
-      email: 'admin@demo.com',
-      role: 'Admin',
-      departmentScope: ['*']
-    });
-    return true;
+  const handleLogin = async (username: string, password?: string) => {
+    try {
+      // Import apiClient locally to avoid circular deps if any
+      const { apiClient } = await import('./lib/api-client');
+      const response = await apiClient.post('/auth/login', { username, password });
+      
+      const user = response.data.data.user;
+      
+      setCurrentUser({
+        id: user.id,
+        username: user.username,
+        name: user.fullName || user.username,
+        email: user.email,
+        role: user.role,
+        departmentScope: ['*']
+      });
+      return true;
+    } catch (error) {
+      console.error('Login failed', error);
+      return false;
+    }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     setCurrentUser(null);
   };
 
@@ -50,6 +62,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assets" element={<AssetBookPage />} />
         <Route path="/master-data" element={<MasterDataPage />} />
+        <Route path="/history" element={<TransactionHistoryPage />} />
       </Route>
     </Routes>
   );

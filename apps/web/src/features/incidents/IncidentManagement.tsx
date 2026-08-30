@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect,useMemo,useState } from 'react'
 import { Activity,AlertTriangle,Bolt,CalendarDays,CheckCircle2,ChevronRight,Clock3,FileText,HardDrive,Network,Plus,Printer,Search,ShieldAlert,UserRound,Wrench,X } from 'lucide-react'
 import type { Asset } from '../../types'

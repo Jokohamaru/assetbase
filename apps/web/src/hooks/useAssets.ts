@@ -8,12 +8,8 @@ export function useAssets(params?: { category?: string; status?: string; search?
   return useQuery({
     queryKey: [...ASSETS_QUERY_KEY, params],
     queryFn: async () => {
-      // Uncomment and use real API when backend is ready
-      // const response = await apiClient.get<Asset[]>('/assets', { params });
-      // return response.data;
-
-      // Temporary mock response
-      return [] as Asset[];
+      const response = await apiClient.get('/assets', { params });
+      return response.data.data || [];
     },
   });
 }
@@ -22,12 +18,50 @@ export function useCreateAsset() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newAsset: Partial<Asset>) => {
-      const response = await apiClient.post<Asset>('/assets', newAsset);
+    mutationFn: async (data: any) => {
+      const response = await apiClient.post('/assets', data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ASSETS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+}
+
+export function useAssignAsset() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiClient.post(`/assets/${id}/assign`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+}
+
+export function useReturnAsset() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiClient.post(`/assets/${id}/return`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+}
+
+export function useHistory(params?: { page?: number; limit?: number }) {
+  return useQuery({
+    queryKey: ['history', params],
+    queryFn: async () => {
+      const response = await apiClient.get('/history', { params });
+      return response.data.data || [];
     },
   });
 }

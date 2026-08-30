@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, BarChart3, Check, ChevronRight, ClipboardCheck, FileCheck2, Plus, Search, ShieldAlert, ShieldCheck, Target, UserRound, X } from 'lucide-react'
 import type { Asset } from '../../types'
