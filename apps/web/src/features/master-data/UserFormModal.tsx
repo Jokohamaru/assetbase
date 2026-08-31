@@ -33,11 +33,11 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900">Thêm Người dùng mới</h2>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-gray-900/80 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 transition-colors">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 transition-colors">Thêm Người dùng mới</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -50,7 +50,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mã nhân viên *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Mã nhân viên *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Briefcase size={18} className="text-gray-400" />
@@ -58,7 +58,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
               <input
                 type="text"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
                 placeholder="EMP-001"
                 value={formData.employeeCode}
                 onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
@@ -67,7 +67,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Tên đăng nhập *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <AtSign size={18} className="text-gray-400" />
@@ -75,7 +75,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
               <input
                 type="text"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
                 placeholder="nguyenvana"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
@@ -84,7 +84,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Họ và tên *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <User size={18} className="text-gray-400" />
@@ -92,7 +92,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
               <input
                 type="text"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
                 placeholder="Nguyễn Văn A"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -101,7 +101,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Email *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail size={18} className="text-gray-400" />
@@ -109,7 +109,7 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
               <input
                 type="email"
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow"
                 placeholder="nguyenvana@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -118,13 +118,13 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Vai trò</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Shield size={18} className="text-gray-400" />
               </div>
               <select
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow appearance-none"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-shadow appearance-none"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               >
@@ -134,15 +134,15 @@ export function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
             </div>
           </div>
 
-          <div className="pt-2 text-sm text-gray-500">
-            * Mật khẩu mặc định sẽ là <span className="font-semibold text-gray-700">AssetBase@123</span>
+          <div className="pt-2 text-sm text-gray-500 dark:text-gray-400 transition-colors">
+            * Mật khẩu mặc định sẽ là <span className="font-semibold text-gray-700 dark:text-gray-300">AssetBase@123</span>
           </div>
 
           <div className="pt-4 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-colors"
             >
               Hủy
             </button>

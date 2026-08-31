@@ -12,7 +12,6 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     assetTag: '',
-    barcode: '',
     serialNumber: '',
     categoryId: '',
     departmentId: '',
@@ -46,7 +45,6 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
       await createAsset.mutateAsync({
         name: formData.name.trim(),
         assetTag: formData.assetTag.trim(),
-        barcode: formData.barcode.trim() || undefined,
         serialNumber: formData.serialNumber.trim() || undefined,
         categoryId: formData.categoryId,
         departmentId: formData.departmentId || undefined,
@@ -57,7 +55,7 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
       
       onClose(); // Close on success
       setFormData({
-        name: '', assetTag: '', barcode: '', serialNumber: '',
+        name: '', assetTag: '', serialNumber: '',
         categoryId: '', departmentId: '', locationId: '', statusId: '', purchaseCost: ''
       });
     } catch (err: any) {
@@ -66,14 +64,14 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Thêm tài sản mới</h2>
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between transition-colors">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 transition-colors">Thêm tài sản mới</h2>
           <button 
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
           >
             <X size={20} />
           </button>
@@ -82,7 +80,7 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
         {/* Body */}
         <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3 text-rose-700">
+            <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-900/50 rounded-lg flex items-start gap-3 text-rose-700 dark:text-rose-400 transition-colors">
               <AlertCircle size={20} className="shrink-0 mt-0.5" />
               <p className="text-sm font-medium">{error}</p>
             </div>
@@ -93,34 +91,34 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
               {/* Cột 1 */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã tài sản (Asset Tag) <span className="text-rose-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Mã tài sản (Asset Tag) <span className="text-rose-500">*</span></label>
                   <input 
                     type="text" 
                     value={formData.assetTag}
                     onChange={e => setFormData({...formData, assetTag: e.target.value})}
                     placeholder="VD: LPT-001"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
-                  <p className="mt-1 text-xs text-gray-500">Mã định danh duy nhất của tài sản</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 transition-colors">Mã định danh duy nhất của tài sản</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên tài sản <span className="text-rose-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Tên tài sản <span className="text-rose-500">*</span></label>
                   <input 
                     type="text" 
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
                     placeholder="VD: MacBook Pro 14 M3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm tài sản <span className="text-rose-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Nhóm tài sản <span className="text-rose-500">*</span></label>
                   <select 
                     value={formData.categoryId}
                     onChange={e => setFormData({...formData, categoryId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   >
                     <option value="">-- Chọn nhóm tài sản --</option>
                     {categories.map((c: any) => (
@@ -130,11 +128,11 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái <span className="text-rose-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Trạng thái <span className="text-rose-500">*</span></label>
                   <select 
                     value={formData.statusId}
                     onChange={e => setFormData({...formData, statusId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   >
                     <option value="">-- Chọn trạng thái --</option>
                     {statuses.map((s: any) => (
@@ -147,33 +145,22 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
               {/* Cột 2 */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã vạch (Barcode)</label>
-                  <input 
-                    type="text" 
-                    value={formData.barcode}
-                    onChange={e => setFormData({...formData, barcode: e.target.value})}
-                    placeholder="Tuỳ chọn"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Số Serial (SN)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Số Serial (SN)</label>
                   <input 
                     type="text" 
                     value={formData.serialNumber}
                     onChange={e => setFormData({...formData, serialNumber: e.target.value})}
                     placeholder="Tuỳ chọn"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng ban quản lý</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Phòng ban quản lý</label>
                   <select 
                     value={formData.departmentId}
                     onChange={e => setFormData({...formData, departmentId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   >
                     <option value="">-- Tuỳ chọn --</option>
                     {departments.map((d: any) => (
@@ -183,11 +170,11 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Vị trí / Kho</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Vị trí / Kho</label>
                   <select 
                     value={formData.locationId}
                     onChange={e => setFormData({...formData, locationId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                   >
                     <option value="">-- Tuỳ chọn --</option>
                     {locations.map((l: any) => (
@@ -201,11 +188,11 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-end gap-3 transition-colors">
           <button 
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Hủy bỏ
           </button>

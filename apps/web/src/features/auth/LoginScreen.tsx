@@ -26,27 +26,27 @@ export function LoginScreen({ onLogin, branding }: { onLogin: (username: string,
   const logo = branding.logoDataUrl ? <img src={branding.logoDataUrl} alt="Logo" className="w-8 h-8 object-contain" /> : <Box size={24} />
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <section className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 transition-colors duration-200">
+      <section className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-8 border border-gray-100 dark:border-gray-800 transition-colors">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20">
             {logo}
           </div>
           <div>
-            <b className="block text-xl font-bold tracking-tight text-gray-900">{branding.appName}</b>
-            <strong className="block text-sm font-medium text-gray-600">{branding.companyName}</strong>
-            <small className="block text-xs text-gray-400 mt-1">{branding.tagline}</small>
+            <b className="block text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100 transition-colors">{branding.appName}</b>
+            <strong className="block text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors">{branding.companyName}</strong>
+            <small className="block text-xs text-gray-400 dark:text-gray-500 mt-1 transition-colors">{branding.tagline}</small>
           </div>
         </div>
         
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Đăng nhập hệ thống</h2>
-          <p className="text-sm text-gray-500">Tài khoản quản trị ban đầu được tạo trong quá trình cài đặt hệ thống.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mb-2 transition-colors">Đăng nhập hệ thống</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">Tài khoản quản trị ban đầu được tạo trong quá trình cài đặt hệ thống.</p>
         </div>
         
         <form onSubmit={submit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên đăng nhập</label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors">Tên đăng nhập</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <UserRound size={18} />
@@ -58,13 +58,13 @@ export function LoginScreen({ onLogin, branding }: { onLogin: (username: string,
                 value={username} 
                 onChange={e => { setUsername(e.target.value); setError('') }} 
                 placeholder="Nhập tên đăng nhập"
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mật khẩu</label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors">Mật khẩu</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <LockKeyhole size={18} />
@@ -76,19 +76,19 @@ export function LoginScreen({ onLogin, branding }: { onLogin: (username: string,
                 value={password} 
                 onChange={e => { setPassword(e.target.value); setError('') }} 
                 placeholder="Nhập mật khẩu"
-                className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm"
+                className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
               />
               <button 
                 type="button" 
                 onClick={() => setShow(x => !x)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 {show ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
           </div>
           
-          {error && <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg">{error}</div>}
+          {error && <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 rounded-lg transition-colors">{error}</div>}
           
           <button 
             disabled={submitting} 
@@ -98,7 +98,7 @@ export function LoginScreen({ onLogin, branding }: { onLogin: (username: string,
           </button>
         </form>
         
-        <footer className="mt-8 text-center text-xs text-gray-400">
+        <footer className="mt-8 text-center text-xs text-gray-400 dark:text-gray-500 transition-colors">
           © {new Date().getFullYear()} {branding.companyName}
         </footer>
       </section>

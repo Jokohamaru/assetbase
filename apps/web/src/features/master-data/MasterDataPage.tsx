@@ -31,13 +31,13 @@ export function MasterDataPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Danh mục hệ thống</h1>
-          <p className="text-sm text-gray-500 mt-1">Quản lý các dữ liệu danh mục gốc của hệ thống AssetFlow</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight transition-colors">Danh mục hệ thống</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors">Quản lý các dữ liệu danh mục gốc của hệ thống AssetFlow</p>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-200">
+        <div className="border-b border-gray-200 dark:border-gray-800 transition-colors">
           <nav className="flex -mb-px px-4 gap-6">
             {tabs.map(tab => {
               const Icon = tab.icon;
@@ -48,8 +48,8 @@ export function MasterDataPage() {
                   onClick={() => setActiveTab(tab.id as Tab)}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-700'
                   }`}
                 >
                   <Icon size={18} />
@@ -62,7 +62,7 @@ export function MasterDataPage() {
 
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 transition-colors">
               {currentTab?.label}
             </h2>
             <button 
@@ -78,9 +78,9 @@ export function MasterDataPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+          <div className="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg transition-colors">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800 transition-colors">
                 {activeTab === 'users' ? (
                   <tr>
                     <th className="px-6 py-3 font-medium">Mã NV</th>
@@ -99,7 +99,7 @@ export function MasterDataPage() {
                   </tr>
                 )}
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900 transition-colors">
                 {isLoading ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
@@ -119,13 +119,13 @@ export function MasterDataPage() {
                 ) : (
                   data.map((item: any) => (
                     activeTab === 'users' ? (
-                      <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 text-gray-900 font-medium">{item.employeeCode}</td>
-                        <td className="px-6 py-4 text-gray-900">
+                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-900 dark:text-gray-100 font-medium">{item.employeeCode}</td>
+                        <td className="px-6 py-4 text-gray-900 dark:text-gray-100">
                           <div className="font-medium">{item.fullName}</div>
-                          <div className="text-xs text-gray-500">@{item.username}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">@{item.username}</div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">{item.email}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.email}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             item.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
@@ -152,10 +152,10 @@ export function MasterDataPage() {
                         </td>
                       </tr>
                     ) : (
-                      <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 text-gray-900 font-medium">{item.code || item.id}</td>
-                        <td className="px-6 py-4 text-gray-600">{item.name}</td>
-                        <td className="px-6 py-4 text-gray-500">
+                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-900 dark:text-gray-100 font-medium">{item.code || item.id}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.name}</td>
+                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                           {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
                         </td>
                         <td className="px-6 py-4">

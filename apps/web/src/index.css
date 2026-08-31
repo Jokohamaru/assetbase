@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-purple: #6653df;
   --color-brand-purple-hover: #5945d4;
@@ -26,6 +28,11 @@ body {
   margin: 0;
   min-width: 320px;
   background: #f6f7fb;
+}
+
+html.dark body {
+  background: #111827; /* gray-900 */
+  color: #f9fafb; /* gray-50 */
 }
 button,
 input,

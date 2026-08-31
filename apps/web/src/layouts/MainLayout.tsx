@@ -3,25 +3,27 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Box, Building2, ChevronRight, HelpCircle, ShieldAlert,
   LockKeyhole, LogOut, Menu, Search, Bell, Settings, History, QrCode, ClipboardList, FileSpreadsheet,
-  Activity, Key
+  Activity, Key, Sun, Moon
 } from 'lucide-react';
 import type { AppUser, BrandingSettings } from '../types';
+import { useThemeStore } from '../store/useThemeStore';
 
 export function MainLayout({ user, branding, logout }: { user: AppUser; branding: BrandingSettings; logout: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   const initials = user.name.split(' ').slice(-2).map(x => x[0]).join('');
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
       {/* Mobile menu overlay */}
       {menuOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-40 lg:hidden" onClick={() => setMenuOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:flex lg:flex-col ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-16 flex items-center px-6 border-b border-gray-100">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:flex lg:flex-col ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3 text-indigo-600 font-bold text-lg">
             {branding.logoDataUrl ? (
               <img src={branding.logoDataUrl} alt="Logo" className="w-8 h-8" />
@@ -68,14 +70,14 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
           </NavLink>
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+            <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.role}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.role}</p>
             </div>
             <button onClick={logout} className="text-gray-400 hover:text-red-600 transition-colors">
               <LogOut size={18} />
@@ -86,18 +88,21 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
-          <button onClick={() => setMenuOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-900">
+        <header className="h-16 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-200">
+          <button onClick={() => setMenuOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-900 dark:hover:text-gray-100">
             <Menu size={24} />
           </button>
 
           <div className="flex-1" />
 
           <div className="flex items-center gap-4">
-            <button className="text-gray-400 hover:text-gray-500"><Search size={20} /></button>
-            <button className="text-gray-400 hover:text-gray-500 relative">
+            <button onClick={toggleTheme} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"><Search size={20} /></button>
+            <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 relative">
               <Bell size={20} />
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white dark:ring-gray-900" />
             </button>
           </div>
         </header>
