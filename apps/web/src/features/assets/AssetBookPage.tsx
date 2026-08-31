@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, Laptop, Monitor, Smartphone, Printer, Server, 
   Search, Building2, Filter, ChevronDown, Plus, 
-  Download, Upload, UserPlus, UserMinus, QrCode, Pencil, Trash2
+  Download, Upload, UserPlus, UserMinus, QrCode, Pencil, Trash2, Edit3, Eye
 } from 'lucide-react';
 import { useAssets } from '../../hooks/useAssets';
 import { useDashboardMetrics } from '../../hooks/useDashboard';
@@ -10,10 +11,15 @@ import { useDepartments } from '../../hooks/useMasterData';
 import { AddAssetModal } from './components/AddAssetModal';
 import { AssignAssetModal } from './components/AssignAssetModal';
 import { ReturnAssetModal } from './components/ReturnAssetModal';
+import { EditAssetModal } from './components/EditAssetModal';
 import { BarcodePrintModal } from '../scanner/BarcodePrintModal';
 import { Asset } from '../../types';
+import { getStatusBadgeClasses, getStatusDotClasses } from '../../utils/theme';
+
+const API_ROOT = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8080';
 
 export function AssetBookPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [department, setDepartment] = useState('');
@@ -22,7 +28,8 @@ export function AssetBookPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedAssetForAssign, setSelectedAssetForAssign] = useState<Asset | null>(null);
   const [selectedAssetForReturn, setSelectedAssetForReturn] = useState<Asset | null>(null);
-  const [selectedAssetForBarcode, setSelectedAssetForBarcode] = useState<Asset | null>(null);
+  const [selectedAssetForEdit, setSelectedAssetForEdit] = useState<Asset | null>(null);
+  const [selectedAssetForPrint, setSelectedAssetForPrint] = useState<Asset | null>(null);
 
   const { data: metricsData } = useDashboardMetrics();
 
@@ -199,8 +206,12 @@ export function AssetBookPage() {
                   <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0 transition-colors">
-                          <Laptop size={20} />
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0 transition-colors overflow-hidden">
+                          {a.imageUrl ? (
+                            <img src={a.imageUrl.startsWith('http') ? a.imageUrl : `${API_ROOT}${a.imageUrl}`} alt={a.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Laptop size={20} />
+                          )}
                         </div>
                         <div>
                           <button className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-left transition-colors">{a.name}</button>
@@ -235,23 +246,27 @@ export function AssetBookPage() {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 transition-colors">Mua {a.purchaseDate ? new Date(a.purchaseDate).toLocaleDateString('vi-VN') : '—'}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                        a.status?.code === 'IN_USE' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 dark:border-emerald-800' :
-                        a.status?.code === 'READY' ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-400 dark:border-blue-800' :
-                        a.status?.code === 'MAINTENANCE' ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-800' :
-                        'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 transition-colors ${
-                          a.status?.code === 'IN_USE' ? 'bg-emerald-500' :
-                          a.status?.code === 'READY' ? 'bg-blue-500' :
-                          a.status?.code === 'MAINTENANCE' ? 'bg-amber-500' :
-                          'bg-gray-500'
-                        }`}></span>
-                        {a.status?.name || 'Sẵn sàng'}
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${getStatusBadgeClasses(a.status?.color)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 transition-colors ${getStatusDotClasses(a.status?.color)}`}></span>
+                        {a.status?.name || '---'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => navigate(`/assets/${a.id}`)}
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                          title="Xem chi tiết thiết bị"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => setSelectedAssetForEdit(a)}
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                          title="Chỉnh sửa tài sản"
+                        >
+                          <Edit3 size={16} />
+                        </button>
                         {a.status?.code === 'IN_USE' ? (
                           <button 
                             onClick={() => setSelectedAssetForReturn(a)}
@@ -270,13 +285,12 @@ export function AssetBookPage() {
                           </button>
                         )}
                         <button 
-                          onClick={() => setSelectedAssetForBarcode(a)}
+                          onClick={() => setSelectedAssetForPrint(a)}
                           className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
                           title="In Barcode / QR"
                         >
                           <QrCode size={16} />
                         </button>
-                        <button className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" title="Sửa"><Pencil size={16} /></button>
                         <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Xóa"><Trash2 size={16} /></button>
                       </div>
                     </td>
@@ -311,18 +325,24 @@ export function AssetBookPage() {
         asset={selectedAssetForAssign}
         onClose={() => setSelectedAssetForAssign(null)} 
       />
-      {selectedAssetForReturn && (
-        <ReturnAssetModal 
-          isOpen={true}
-          asset={selectedAssetForReturn} 
-          onClose={() => setSelectedAssetForReturn(null)} 
-        />
-      )}
+      <ReturnAssetModal 
+        isOpen={!!selectedAssetForReturn} 
+        onClose={() => setSelectedAssetForReturn(null)} 
+        asset={selectedAssetForReturn}
+      />
 
-      {selectedAssetForBarcode && (
+      <EditAssetModal
+        isOpen={!!selectedAssetForEdit}
+        onClose={() => setSelectedAssetForEdit(null)}
+        asset={selectedAssetForEdit}
+        onAssign={(asset) => setSelectedAssetForAssign(asset)}
+        onReturn={(asset) => setSelectedAssetForReturn(asset)}
+      />
+
+      {selectedAssetForPrint && (
         <BarcodePrintModal 
-          asset={selectedAssetForBarcode} 
-          onClose={() => setSelectedAssetForBarcode(null)} 
+          asset={selectedAssetForPrint} 
+          onClose={() => setSelectedAssetForPrint(null)} 
         />
       )}
     </div>

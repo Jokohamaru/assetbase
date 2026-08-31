@@ -21,6 +21,7 @@ type CreateAssetRequest struct {
 	IpAddress      *string `json:"ipAddress"`
 	MacAddress     *string `json:"macAddress"`
 	Notes          *string `json:"notes"`
+	ImageUrl       *string `json:"imageUrl"`
 }
 
 type UpdateAssetRequest struct {
@@ -43,6 +44,7 @@ type UpdateAssetRequest struct {
 	IpAddress      *string `json:"ipAddress"`
 	MacAddress     *string `json:"macAddress"`
 	Notes          *string `json:"notes"`
+	ImageUrl       *string `json:"imageUrl"`
 }
 
 type AssetResponse struct {
@@ -74,6 +76,7 @@ type AssetResponse struct {
 	IpAddress          *string `json:"ipAddress"`
 	MacAddress         *string `json:"macAddress"`
 	Notes              *string `json:"notes"`
+	ImageUrl           *string `json:"imageUrl"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
 }

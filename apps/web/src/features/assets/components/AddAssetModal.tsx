@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Save, AlertCircle } from 'lucide-react';
-import { useCreateAsset } from '../../../hooks/useAssets';
+import { X, Save, AlertCircle, Upload, Image as ImageIcon } from 'lucide-react';
+import { useCreateAsset, useUploadFile } from '../../../hooks/useAssets';
 import { useCategories, useDepartments, useLocations, useAssetStatuses } from '../../../hooks/useMasterData';
 
 interface AddAssetModalProps {
@@ -21,6 +21,8 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: categories = [] } = useCategories();
   const { data: departments = [] } = useDepartments();
@@ -28,6 +30,7 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   const { data: statuses = [] } = useAssetStatuses();
 
   const createAsset = useCreateAsset();
+  const uploadFile = useUploadFile();
 
   if (!isOpen) return null;
 
@@ -42,6 +45,15 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
     if (!formData.statusId) return setError('Vui lòng chọn trạng thái');
 
     try {
+      let imageUrl: string | undefined = undefined;
+      
+      if (imageFile) {
+        const uploadResult = await uploadFile.mutateAsync(imageFile);
+        if (uploadResult && uploadResult.url) {
+          imageUrl = uploadResult.url;
+        }
+      }
+
       await createAsset.mutateAsync({
         name: formData.name.trim(),
         assetTag: formData.assetTag.trim(),
@@ -51,6 +63,7 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
         locationId: formData.locationId || undefined,
         statusId: formData.statusId,
         purchaseCost: formData.purchaseCost ? parseFloat(formData.purchaseCost) : undefined,
+        imageUrl: imageUrl,
       });
       
       onClose(); // Close on success
@@ -58,6 +71,8 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
         name: '', assetTag: '', serialNumber: '',
         categoryId: '', departmentId: '', locationId: '', statusId: '', purchaseCost: ''
       });
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài sản');
     }
@@ -145,6 +160,52 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
               {/* Cột 2 */}
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Hình ảnh</label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md transition-colors relative overflow-hidden group min-h-[140px]">
+                    {imagePreview ? (
+                      <div className="absolute inset-0 w-full h-full">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            type="button"
+                            onClick={() => { setImageFile(null); setImagePreview(null); }}
+                            className="text-white bg-red-600 hover:bg-red-700 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                          >
+                            Xóa ảnh
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1 text-center">
+                        <ImageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 transition-colors" />
+                        <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center transition-colors">
+                          <label
+                            htmlFor="file-upload"
+                            className="relative cursor-pointer bg-white dark:bg-gray-900 rounded-md font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 transition-colors"
+                          >
+                            <span>Tải ảnh lên</span>
+                            <input 
+                              id="file-upload" 
+                              name="file-upload" 
+                              type="file" 
+                              className="sr-only" 
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setImageFile(e.target.files[0]);
+                                  setImagePreview(URL.createObjectURL(e.target.files[0]));
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">PNG, JPG, GIF lên tới 5MB</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Số Serial (SN)</label>
                   <input 
                     type="text" 
@@ -199,10 +260,10 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
           <button 
             type="submit"
             form="add-asset-form"
-            disabled={createAsset.isPending}
+            disabled={createAsset.isPending || uploadFile.isPending}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {createAsset.isPending ? 'Đang lưu...' : (
+            {createAsset.isPending || uploadFile.isPending ? 'Đang lưu...' : (
               <>
                 <Save size={16} /> Lưu tài sản
               </>

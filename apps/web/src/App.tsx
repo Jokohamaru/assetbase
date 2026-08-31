@@ -5,6 +5,7 @@ import { LoginScreen } from './features/auth/LoginScreen';
 import { MasterDataPage } from './features/master-data/MasterDataPage';
 import { DashboardPage } from './features/dashboard/DashboardPage';
 import { AssetBookPage } from './features/assets/AssetBookPage';
+import { AssetDetailPage } from './features/assets/AssetDetailPage';
 import { TransactionHistoryPage } from './features/reports/TransactionHistoryPage';
 import { ScannerPage } from './features/scanner/ScannerPage';
 import { InventoryListPage } from './features/inventory/InventoryListPage';
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assets" element={<AssetBookPage />} />
+        <Route path="/assets/:id" element={<AssetDetailPage />} />
         <Route path="/scanner" element={<ScannerPage />} />
         <Route path="/inventory" element={<InventoryListPage />} />
         <Route path="/inventory/:id" element={<InventoryDetailPage />} />

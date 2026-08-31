@@ -52,6 +52,9 @@ func main() {
 		})
 	})
 
+	// Serve static uploads
+	r.Static("/uploads", "./uploads")
+
 	// Setup Services and Handlers
 	authService := service.NewAuthService(cfg)
 	authHandler := handler.NewAuthHandler(authService)
@@ -91,6 +94,8 @@ func main() {
 	dashboardService := service.NewDashboardService()
 	dashboardHandler := handler.NewDashboardHandler(dashboardService)
 
+	uploadHandler := handler.NewUploadHandler()
+
 	v1 := r.Group("/api/v1")
 	{
 		// Public routes
@@ -105,6 +110,9 @@ func main() {
 			protected.PUT("/auth/password", authHandler.ChangePassword)
 			protected.GET("/history", historyHandler.ListHistory)
 			
+			// Upload route
+			protected.POST("/upload", uploadHandler.UploadImage)
+			
 			// Dashboard routes
 			dashboard := protected.Group("/dashboard")
 			{
@@ -117,6 +125,7 @@ func main() {
 				assets.GET("", assetHandler.ListAssets)
 				assets.GET("/:id", assetHandler.GetAsset)
 				assets.POST("", assetHandler.CreateAsset)
+				assets.PUT("/:id", assetHandler.UpdateAsset)
 				
 				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
 				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)

@@ -480,6 +480,7 @@ model Asset {
   departmentId       String?             @db.Uuid
   locationId         String?             @db.Uuid
   warehouseId        String?             @db.Uuid
+  imageUrl           String?             @db.VarChar(500)
   category           AssetCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   model              ProductModel?       @relation(fields: [modelId], references: [id], onDelete: Restrict)
   manufacturer       Manufacturer?       @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)

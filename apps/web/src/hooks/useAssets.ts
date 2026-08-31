@@ -14,12 +14,35 @@ export function useAssets(params?: { category?: string; status?: string; search?
   });
 }
 
+export function useAsset(id: string) {
+  return useQuery({
+    queryKey: [...ASSETS_QUERY_KEY, id],
+    queryFn: async () => {
+      const response = await apiClient.get(`/assets/${id}`);
+      return response.data.data;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateAsset() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Omit<Asset, 'id' | 'createdAt' | 'updatedAt'>) => {
       const response = await apiClient.post('/assets', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+}
+
+export function useUpdateAsset() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Asset> }) => {
+      const response = await apiClient.put(`/assets/${id}`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -62,6 +85,22 @@ export function useHistory(params?: { page?: number; limit?: number }) {
     queryFn: async () => {
       const response = await apiClient.get('/history', { params });
       return response.data.data || [];
+    },
+  });
+}
+
+export function useUploadFile() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await apiClient.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.data; // should contain { url: '...' }
     },
   });
 }
