@@ -33,4 +33,10 @@ go.work.sum
 
 # node_modules
 node_modules/
-    
+
+
+# build binary
+apps/api/server
+apps/api/bin/
+# build frontend
+apps/web/dist
