@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
+	"github.com/Jokohamaru/assetbase/pkg/password"
 	"github.com/Jokohamaru/assetbase/pkg/response"
 	"github.com/Jokohamaru/assetbase/prisma/db"
 	"github.com/gin-gonic/gin"
@@ -76,12 +77,20 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		role = db.UserRoleAdmin
 	}
 
+	// Set default password to "AssetBase@123"
+	defaultHash, err := password.Hash("AssetBase@123", 12)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to hash password")
+		return
+	}
+
 	user, err := database.Client.User.CreateOne(
 		db.User.EmployeeCode.Set(req.EmployeeCode),
 		db.User.Username.Set(req.Username),
 		db.User.FullName.Set(req.FullName),
 		db.User.Email.Set(req.Email),
 		db.User.Role.Set(role),
+		db.User.PasswordHash.Set(defaultHash),
 		db.User.MustChangePassword.Set(true),
 	).Exec(c.Request.Context())
 
