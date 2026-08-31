@@ -5,6 +5,7 @@ import {
   Download, Upload, UserPlus, UserMinus, QrCode, Pencil, Trash2
 } from 'lucide-react';
 import { useAssets } from '../../hooks/useAssets';
+import { useDashboardMetrics } from '../../hooks/useDashboard';
 import { useDepartments } from '../../hooks/useMasterData';
 import { AddAssetModal } from './components/AddAssetModal';
 import { AssignAssetModal } from './components/AssignAssetModal';
@@ -23,6 +24,8 @@ export function AssetBookPage() {
   const [selectedAssetForReturn, setSelectedAssetForReturn] = useState<Asset | null>(null);
   const [selectedAssetForBarcode, setSelectedAssetForBarcode] = useState<Asset | null>(null);
 
+  const { data: metricsData } = useDashboardMetrics();
+
   const { data: assets = [], isLoading } = useAssets({
     category: activeTab === 'all' ? undefined : activeTab,
     search: searchQuery || undefined,
@@ -32,7 +35,7 @@ export function AssetBookPage() {
   const { data: departments = [] } = useDepartments();
 
   const assetGroups = [
-    { id: 'all', label: 'Tất cả', count: assets.length, icon: Box },
+    { id: 'all', label: 'Tất cả', count: metricsData?.totalAssets || 0, icon: Box },
     { id: 'Laptop', label: 'Laptop', count: assets.filter((a: any) => a.category?.name === 'Laptop').length, icon: Laptop },
     { id: 'PC / Desktop', label: 'PC', count: assets.filter((a: any) => a.category?.name === 'PC / Desktop').length, icon: Monitor },
     { id: 'Mobile', label: 'Mobile', count: assets.filter((a: any) => a.category?.name === 'Mobile').length, icon: Smartphone },
@@ -66,19 +69,15 @@ export function AssetBookPage() {
       {/* Summary Stats */}
       <div className="flex flex-wrap gap-4 text-sm font-medium">
         <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
-          <span className="text-gray-900 font-bold">{assets.length}</span> <span className="text-gray-500">tài sản</span>
+          <span className="text-gray-900 font-bold">{metricsData?.totalAssets || 0}</span> <span className="text-gray-500">tài sản</span>
         </div>
         <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span className="text-gray-900 font-bold">{assets.filter((a: any) => a.status?.code === 'IN_USE').length}</span> <span className="text-gray-500">đang sử dụng</span>
+          <span className="text-gray-900 font-bold">{metricsData?.inUseAssets || 0}</span> <span className="text-gray-500">đang sử dụng</span>
         </div>
         <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-          <span className="text-gray-900 font-bold">{assets.filter((a: any) => a.status?.code === 'MAINTENANCE').length}</span> <span className="text-gray-500">bảo trì</span>
-        </div>
-        <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-          <span className="text-gray-900 font-bold">{assets.filter((a: any) => a.status?.code === 'BROKEN').length}</span> <span className="text-gray-500">hỏng</span>
+          <span className="text-gray-900 font-bold">{metricsData?.attentionAssets || 0}</span> <span className="text-gray-500">bảo trì / hỏng</span>
         </div>
       </div>
 

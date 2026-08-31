@@ -88,6 +88,9 @@ func main() {
 	riskService := service.NewRiskService()
 	riskHandler := handler.NewRiskHandler(riskService)
 
+	dashboardService := service.NewDashboardService()
+	dashboardHandler := handler.NewDashboardHandler(dashboardService)
+
 	v1 := r.Group("/api/v1")
 	{
 		// Public routes
@@ -101,6 +104,12 @@ func main() {
 			protected.GET("/auth/me", authHandler.GetMe)
 			protected.PUT("/auth/password", authHandler.ChangePassword)
 			protected.GET("/history", historyHandler.ListHistory)
+			
+			// Dashboard routes
+			dashboard := protected.Group("/dashboard")
+			{
+				dashboard.GET("/metrics", dashboardHandler.GetMetrics)
+			}
 			
 			// Asset routes
 			assets := protected.Group("/assets")

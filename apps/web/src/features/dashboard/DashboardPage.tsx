@@ -3,15 +3,18 @@ import {
   LayoutDashboard, Box, UserRound, AlertTriangle, Wrench, CircleDollarSign,
   CalendarDays, RotateCcw, ArrowUpRight, Plus, PackageCheck, ChevronRight
 } from 'lucide-react';
+import { useDashboardMetrics } from '../../hooks/useDashboard';
 
 export function DashboardPage() {
   const [activeView, setActiveView] = useState<'all' | 'inUse' | 'attention' | 'overdue'>('all');
+  
+  const { data: metricsData } = useDashboardMetrics();
 
   const metrics = [
-    { key: 'all', label: 'Tổng tài sản', value: 1245, Icon: Box, color: 'text-blue-600', bg: 'bg-blue-100', border: 'border-blue-200' },
-    { key: 'inUse', label: 'Đang sử dụng', value: 856, Icon: UserRound, color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-200' },
-    { key: 'attention', label: 'Bảo trì / Hỏng', value: 42, Icon: Wrench, color: 'text-amber-600', bg: 'bg-amber-100', border: 'border-amber-200' },
-    { key: 'overdue', label: 'Quá hạn trả', value: 12, Icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-100', border: 'border-rose-200' },
+    { key: 'all', label: 'Tổng tài sản', value: metricsData?.totalAssets || 0, Icon: Box, color: 'text-blue-600', bg: 'bg-blue-100', border: 'border-blue-200' },
+    { key: 'inUse', label: 'Đang sử dụng', value: metricsData?.inUseAssets || 0, Icon: UserRound, color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-200' },
+    { key: 'attention', label: 'Bảo trì / Hỏng', value: metricsData?.attentionAssets || 0, Icon: Wrench, color: 'text-amber-600', bg: 'bg-amber-100', border: 'border-amber-200' },
+    { key: 'overdue', label: 'Quá hạn trả', value: metricsData?.overdueAssets || 0, Icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-100', border: 'border-rose-200' },
   ] as const;
 
   return (
