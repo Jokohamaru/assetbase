@@ -76,6 +76,12 @@ func main() {
 	importService := service.NewImportService()
 	importHandler := handler.NewImportHandler(importService)
 
+	incidentService := service.NewIncidentService()
+	incidentHandler := handler.NewIncidentHandler(incidentService)
+
+	digitalService := service.NewDigitalService()
+	digitalHandler := handler.NewDigitalHandler(digitalService)
+
 	v1 := r.Group("/api/v1")
 	{
 		// Public routes
@@ -121,6 +127,27 @@ func main() {
 				imports.POST("/upload", importHandler.UploadFile)
 				imports.POST("/:id/commit", importHandler.CommitBatch)
 				imports.POST("/:id/rollback", importHandler.RollbackBatch)
+			}
+
+			// Incident routes
+			incidents := protected.Group("/incidents")
+			{
+				incidents.GET("", incidentHandler.ListIncidents)
+				incidents.POST("", incidentHandler.CreateIncident)
+				incidents.GET("/:id", incidentHandler.GetIncident)
+				incidents.PUT("/:id/status", incidentHandler.UpdateStatus)
+				incidents.PUT("/:id/assign", incidentHandler.AssignIncident)
+			}
+
+			// Digital Entitlements routes
+			entitlements := protected.Group("/entitlements")
+			{
+				entitlements.GET("", digitalHandler.ListEntitlements)
+				entitlements.POST("", digitalHandler.CreateEntitlement)
+				entitlements.GET("/:id", digitalHandler.GetEntitlement)
+				entitlements.POST("/:id/assignments", digitalHandler.AssignEntitlement)
+				entitlements.PATCH("/:id/assignments/:aId", digitalHandler.RevokeAssignment)
+				entitlements.POST("/:id/renewals", digitalHandler.RenewEntitlement)
 			}
 			
 			// Admin routes

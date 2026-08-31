@@ -10,7 +10,11 @@ import { ScannerPage } from './features/scanner/ScannerPage';
 import { InventoryListPage } from './features/inventory/InventoryListPage';
 import { InventoryDetailPage } from './features/inventory/InventoryDetailPage';
 import { ImportPage } from './features/import/ImportPage';
+import { IncidentListPage } from './features/incidents/IncidentListPage';
+import { IncidentDetailPage } from './features/incidents/IncidentDetailPage';
 import { InventoryScanPage } from './features/inventory/InventoryScanPage';
+import { DigitalListPage } from './features/digital/DigitalListPage';
+import { DigitalDetailPage } from './features/digital/DigitalDetailPage';
 import type { AppUser, BrandingSettings } from './types';
 
 export default function App() {
@@ -71,6 +75,15 @@ export default function App() {
         <Route path="/inventory/:id" element={<InventoryDetailPage />} />
         <Route path="/inventory/:id/scan" element={<InventoryScanPage />} />
         <Route path="/imports" element={<ImportPage />} />
+        
+        {/* Incidents */}
+        <Route path="/incidents" element={<IncidentListPage />} />
+        <Route path="/incidents/:id" element={<IncidentDetailPage />} />
+
+        {/* Digital Entitlements */}
+        <Route path="/entitlements" element={<DigitalListPage />} />
+        <Route path="/entitlements/:id" element={<DigitalDetailPage />} />
+
         <Route path="/master-data" element={<MasterDataPage />} />
         <Route path="/history" element={<TransactionHistoryPage />} />
       </Route>

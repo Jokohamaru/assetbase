@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { 
   Box, Building2, ChevronRight, HelpCircle, 
-  LockKeyhole, LogOut, Menu, Search, Bell, Settings, History, QrCode, ClipboardList, FileSpreadsheet
+  LockKeyhole, LogOut, Menu, Search, Bell, Settings, History, QrCode, ClipboardList, FileSpreadsheet,
+  Activity, Key
 } from 'lucide-react';
 import type { AppUser, BrandingSettings } from '../types';
 
@@ -38,6 +38,9 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
           <NavLink to="/assets" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
             <Box size={18} /> Sổ tài sản
           </NavLink>
+          <NavLink to="/entitlements" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+            <Key size={18} /> Tài sản số
+          </NavLink>
           <NavLink to="/master-data" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
             <Settings size={18} /> Danh mục
           </NavLink>
@@ -49,6 +52,9 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
           </NavLink>
           <NavLink to="/imports" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
             <FileSpreadsheet size={18} /> Nhập hàng loạt
+          </NavLink>
+          <NavLink to="/incidents" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+            <Activity size={18} /> Quản lý sự cố
           </NavLink>
           <NavLink to="/history" className={({isActive}) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
             <History size={18} /> Lịch sử / Audit
