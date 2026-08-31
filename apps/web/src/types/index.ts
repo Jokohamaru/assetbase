@@ -268,3 +268,76 @@ export interface DigitalRenewal {
   notes?: string;
   createdAt: string;
 }
+
+// --- Vendor Management Types ---
+export interface Vendor {
+  id: string;
+  code: string;
+  name: string;
+  taxCode?: string;
+  category: string;
+  contact: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  certifications?: string;
+  status: string;
+  lastEvaluation?: string;
+  score: number;
+  scores: any; // JSON object representing evaluation scores
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  entitlements?: DigitalEntitlement[];
+}
+
+export interface VendorEvaluation {
+  scores: Record<string, number>;
+}
+
+// --- Risk Assessment Types ---
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type RiskTreatmentStrategy = 'MITIGATE' | 'ACCEPT' | 'TRANSFER' | 'AVOID';
+export type RiskItemStatus = 'IDENTIFIED' | 'ASSESSED' | 'TREATING' | 'MITIGATED' | 'ACCEPTED';
+export type RiskAssessmentStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'CLOSED';
+
+export interface RiskItem {
+  id: string;
+  riskNo: string;
+  title: string;
+  category: string;
+  scenario: string;
+  threat: string;
+  vulnerability: string;
+  existingControls?: string;
+  likelihood: number;
+  impact: number;
+  inherentScore: number;
+  inherentLevel: RiskLevel;
+  residualLikelihood?: number;
+  residualImpact?: number;
+  residualScore?: number;
+  residualLevel?: RiskLevel;
+  treatmentStrategy: RiskTreatmentStrategy;
+  acceptanceRationale?: string;
+  status: RiskItemStatus;
+  ownerId: string;
+  dueDate?: string;
+  owner?: AppUser;
+}
+
+export interface RiskAssessment {
+  id: string;
+  assessmentNo: string;
+  title: string;
+  description?: string;
+  scope: string;
+  methodology: string;
+  status: RiskAssessmentStatus;
+  startDate: string;
+  targetDate?: string;
+  ownerId: string;
+  owner?: AppUser;
+  approver?: AppUser;
+  risks?: RiskItem[];
+}

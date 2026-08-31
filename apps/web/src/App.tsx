@@ -15,6 +15,10 @@ import { IncidentDetailPage } from './features/incidents/IncidentDetailPage';
 import { InventoryScanPage } from './features/inventory/InventoryScanPage';
 import { DigitalListPage } from './features/digital/DigitalListPage';
 import { DigitalDetailPage } from './features/digital/DigitalDetailPage';
+import { VendorListPage } from './features/vendors/VendorListPage';
+import { VendorDetailPage } from './features/vendors/VendorDetailPage';
+import { RiskListPage } from './features/risks/RiskListPage';
+import { RiskDetailPage } from './features/risks/RiskDetailPage';
 import type { AppUser, BrandingSettings } from './types';
 
 export default function App() {
@@ -83,6 +87,14 @@ export default function App() {
         {/* Digital Entitlements */}
         <Route path="/entitlements" element={<DigitalListPage />} />
         <Route path="/entitlements/:id" element={<DigitalDetailPage />} />
+
+        {/* Vendors */}
+        <Route path="/vendors" element={<VendorListPage />} />
+        <Route path="/vendors/:id" element={<VendorDetailPage />} />
+
+        {/* Risk Assessment */}
+        <Route path="/risks" element={<RiskListPage />} />
+        <Route path="/risks/:id" element={<RiskDetailPage />} />
 
         <Route path="/master-data" element={<MasterDataPage />} />
         <Route path="/history" element={<TransactionHistoryPage />} />

@@ -82,6 +82,12 @@ func main() {
 	digitalService := service.NewDigitalService()
 	digitalHandler := handler.NewDigitalHandler(digitalService)
 
+	vendorService := service.NewVendorService()
+	vendorHandler := handler.NewVendorHandler(vendorService)
+
+	riskService := service.NewRiskService()
+	riskHandler := handler.NewRiskHandler(riskService)
+
 	v1 := r.Group("/api/v1")
 	{
 		// Public routes
@@ -148,6 +154,31 @@ func main() {
 				entitlements.POST("/:id/assignments", digitalHandler.AssignEntitlement)
 				entitlements.PATCH("/:id/assignments/:aId", digitalHandler.RevokeAssignment)
 				entitlements.POST("/:id/renewals", digitalHandler.RenewEntitlement)
+			}
+			
+			// Vendors routes
+			vendors := protected.Group("/vendors")
+			{
+				vendors.POST("", vendorHandler.CreateVendor)
+				vendors.GET("", vendorHandler.ListVendors)
+				vendors.GET("/:id", vendorHandler.GetVendor)
+				vendors.PUT("/:id", vendorHandler.UpdateVendor)
+				vendors.POST("/:id/evaluate", vendorHandler.EvaluateVendor)
+			}
+			
+			// Risk Assessment routes
+			risks := protected.Group("/risk-assessments")
+			{
+				risks.POST("", riskHandler.CreateAssessment)
+				risks.GET("", riskHandler.ListAssessments)
+				risks.GET("/:id", riskHandler.GetAssessment)
+				risks.PUT("/:id/status", riskHandler.UpdateAssessmentStatus)
+				risks.POST("/:id/items", riskHandler.CreateRiskItem)
+			}
+
+			riskItems := protected.Group("/risk-items")
+			{
+				riskItems.PUT("/:itemId/treatment", riskHandler.UpdateRiskTreatment)
 			}
 			
 			// Admin routes
