@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useDepartments, useLocations, useCategories, useManufacturers } from '../../hooks/useMasterData';
+import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2, User } from 'lucide-react';
+import { useDepartments, useLocations, useCategories, useManufacturers, useUsers } from '../../hooks/useMasterData';
+import { UserFormModal } from './UserFormModal';
 
-type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers';
+type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users';
 
 export function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<Tab>('departments');
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   
   const { data: departments = [], isLoading: isLoadingDept } = useDepartments();
   const { data: locations = [], isLoading: isLoadingLoc } = useLocations();
   const { data: categories = [], isLoading: isLoadingCat } = useCategories();
   const { data: manufacturers = [], isLoading: isLoadingMan } = useManufacturers();
+  const { data: users = [], isLoading: isLoadingUsers } = useUsers();
 
   const tabs = [
     { id: 'departments', label: 'Phòng ban', icon: Building2, data: departments, isLoading: isLoadingDept },
     { id: 'locations', label: 'Kho & Vị trí', icon: MapPin, data: locations, isLoading: isLoadingLoc },
     { id: 'categories', label: 'Nhóm tài sản', icon: Tags, data: categories, isLoading: isLoadingCat },
     { id: 'manufacturers', label: 'Nhà sản xuất', icon: Box, data: manufacturers, isLoading: isLoadingMan },
+    { id: 'users', label: 'Người dùng', icon: User, data: users, isLoading: isLoadingUsers },
   ] as const;
 
   const currentTab = tabs.find(t => t.id === activeTab);
@@ -61,7 +65,15 @@ export function MasterDataPage() {
             <h2 className="text-lg font-semibold text-gray-800">
               {currentTab?.label}
             </h2>
-            <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+            <button 
+              onClick={() => {
+                if (activeTab === 'users') {
+                  setIsUserModalOpen(true);
+                } else {
+                  // handle other tabs add
+                }
+              }}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
               <Plus size={16} /> Thêm mới
             </button>
           </div>
@@ -69,12 +81,23 @@ export function MasterDataPage() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-500 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 font-medium">Mã</th>
-                  <th className="px-6 py-3 font-medium">Tên</th>
-                  <th className="px-6 py-3 font-medium">Ngày tạo</th>
-                  <th className="px-6 py-3 font-medium w-24">Thao tác</th>
-                </tr>
+                {activeTab === 'users' ? (
+                  <tr>
+                    <th className="px-6 py-3 font-medium">Mã NV</th>
+                    <th className="px-6 py-3 font-medium">Họ tên</th>
+                    <th className="px-6 py-3 font-medium">Email</th>
+                    <th className="px-6 py-3 font-medium">Vai trò</th>
+                    <th className="px-6 py-3 font-medium">Trạng thái</th>
+                    <th className="px-6 py-3 font-medium w-24">Thao tác</th>
+                  </tr>
+                ) : (
+                  <tr>
+                    <th className="px-6 py-3 font-medium">Mã</th>
+                    <th className="px-6 py-3 font-medium">Tên</th>
+                    <th className="px-6 py-3 font-medium">Ngày tạo</th>
+                    <th className="px-6 py-3 font-medium w-24">Thao tác</th>
+                  </tr>
+                )}
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {isLoading ? (
@@ -95,23 +118,58 @@ export function MasterDataPage() {
                   </tr>
                 ) : (
                   data.map((item: any) => (
-                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 text-gray-900 font-medium">{item.code || item.id}</td>
-                      <td className="px-6 py-4 text-gray-600">{item.name}</td>
-                      <td className="px-6 py-4 text-gray-500">
-                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <button className="text-gray-400 hover:text-indigo-600 transition-colors">
-                            <Pencil size={16} />
-                          </button>
-                          <button className="text-gray-400 hover:text-red-600 transition-colors">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                    activeTab === 'users' ? (
+                      <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-900 font-medium">{item.employeeCode}</td>
+                        <td className="px-6 py-4 text-gray-900">
+                          <div className="font-medium">{item.fullName}</div>
+                          <div className="text-xs text-gray-500">@{item.username}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{item.email}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            item.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {item.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            item.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <button className="text-gray-400 hover:text-indigo-600 transition-colors">
+                              <Pencil size={16} />
+                            </button>
+                            <button className="text-gray-400 hover:text-red-600 transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-900 font-medium">{item.code || item.id}</td>
+                        <td className="px-6 py-4 text-gray-600">{item.name}</td>
+                        <td className="px-6 py-4 text-gray-500">
+                          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '—'}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <button className="text-gray-400 hover:text-indigo-600 transition-colors">
+                              <Pencil size={16} />
+                            </button>
+                            <button className="text-gray-400 hover:text-red-600 transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
                   ))
                 )}
               </tbody>
@@ -119,6 +177,7 @@ export function MasterDataPage() {
           </div>
         </div>
       </div>
+      <UserFormModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
     </div>
   );
 }
