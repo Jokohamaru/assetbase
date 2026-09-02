@@ -5,13 +5,14 @@ import {
   Search, Building2, Filter, ChevronDown, Plus, 
   Download, Upload, UserPlus, UserMinus, QrCode, Pencil, Trash2, Edit3, Eye
 } from 'lucide-react';
-import { useAssets } from '../../hooks/useAssets';
+import { useAssets, useDeleteAsset } from '../../hooks/useAssets';
 import { useDashboardMetrics } from '../../hooks/useDashboard';
 import { useDepartments } from '../../hooks/useMasterData';
 import { AddAssetModal } from './components/AddAssetModal';
 import { AssignAssetModal } from './components/AssignAssetModal';
 import { ReturnAssetModal } from './components/ReturnAssetModal';
 import { EditAssetModal } from './components/EditAssetModal';
+import { ConfirmDeleteModal } from './components/ConfirmDeleteModal';
 import { BarcodePrintModal } from '../scanner/BarcodePrintModal';
 import { Asset } from '../../types';
 import { getStatusBadgeClasses, getStatusDotClasses } from '../../utils/theme';
@@ -30,6 +31,7 @@ export function AssetBookPage() {
   const [selectedAssetForReturn, setSelectedAssetForReturn] = useState<Asset | null>(null);
   const [selectedAssetForEdit, setSelectedAssetForEdit] = useState<Asset | null>(null);
   const [selectedAssetForPrint, setSelectedAssetForPrint] = useState<Asset | null>(null);
+  const [selectedAssetForDelete, setSelectedAssetForDelete] = useState<Asset | null>(null);
 
   const { data: metricsData } = useDashboardMetrics();
 
@@ -40,6 +42,17 @@ export function AssetBookPage() {
   });
   
   const { data: departments = [] } = useDepartments();
+  const deleteMutation = useDeleteAsset();
+
+  const handleDelete = () => {
+    if (selectedAssetForDelete) {
+      deleteMutation.mutate(selectedAssetForDelete.id, {
+        onSuccess: () => {
+          setSelectedAssetForDelete(null);
+        }
+      });
+    }
+  };
 
   const assetGroups = [
     { id: 'all', label: 'Tất cả', count: metricsData?.totalAssets || 0, icon: Box },
@@ -291,7 +304,13 @@ export function AssetBookPage() {
                         >
                           <QrCode size={16} />
                         </button>
-                        <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Xóa"><Trash2 size={16} /></button>
+                        <button 
+                          onClick={() => setSelectedAssetForDelete(a)}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" 
+                          title="Xóa"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -345,6 +364,13 @@ export function AssetBookPage() {
           onClose={() => setSelectedAssetForPrint(null)} 
         />
       )}
+      <ConfirmDeleteModal
+        isOpen={!!selectedAssetForDelete}
+        onClose={() => setSelectedAssetForDelete(null)}
+        onConfirm={handleDelete}
+        asset={selectedAssetForDelete}
+        isDeleting={deleteMutation.isPending}
+      />
     </div>
   );
 }

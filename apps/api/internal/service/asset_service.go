@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
 	"github.com/Jokohamaru/assetbase/internal/dto"
@@ -256,4 +257,26 @@ func (s *AssetService) UpdateAsset(ctx context.Context, actorID string, id strin
 	).Exec(ctx)
 
 	return asset, nil
+}
+
+func (s *AssetService) DeleteAsset(ctx context.Context, actorID string, id string) error {
+	_, err := database.Client.Asset.FindUnique(
+		db.Asset.ID.Equals(id),
+	).Update(
+		db.Asset.DeletedAt.Set(time.Now()),
+	).Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	// Create History for deletion
+	_, _ = database.Client.AssetHistory.CreateOne(
+		db.AssetHistory.Action.Set(db.AssetHistoryActionUpdated),
+		db.AssetHistory.Description.Set("Asset deleted (soft delete)"),
+		db.AssetHistory.Asset.Link(db.Asset.ID.Equals(id)),
+		db.AssetHistory.Actor.Link(db.User.ID.Equals(actorID)),
+	).Exec(ctx)
+
+	return nil
 }

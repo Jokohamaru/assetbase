@@ -126,6 +126,7 @@ func main() {
 				assets.GET("/:id", assetHandler.GetAsset)
 				assets.POST("", assetHandler.CreateAsset)
 				assets.PUT("/:id", assetHandler.UpdateAsset)
+				assets.DELETE("/:id", assetHandler.DeleteAsset)
 				
 				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
 				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)

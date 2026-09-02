@@ -81,3 +81,18 @@ func (h *AssetHandler) UpdateAsset(c *gin.Context) {
 	}
 	response.Success(c, data)
 }
+
+func (h *AssetHandler) DeleteAsset(c *gin.Context) {
+	id := c.Param("id")
+	userID, _ := c.Get("userID")
+
+	err := h.Service.DeleteAsset(c.Request.Context(), userID.(string), id)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	
+	response.Success(c, map[string]interface{}{
+		"message": "Asset deleted successfully",
+	})
+}

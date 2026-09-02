@@ -51,6 +51,19 @@ export function useUpdateAsset() {
   });
 }
 
+export function useDeleteAsset() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiClient.delete(`/assets/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+}
+
 export function useAssignAsset() {
   const queryClient = useQueryClient();
 

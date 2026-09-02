@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, AlertCircle, Image as ImageIcon, PenTool, Zap, CheckCircle, RefreshCcw } from 'lucide-react';
+import { X, Save, AlertCircle, Image as ImageIcon, PenTool, Zap, CheckCircle, RefreshCcw, ChevronDown, ChevronRight, Cpu } from 'lucide-react';
 import { useUpdateAsset, useUploadFile } from '../../../hooks/useAssets';
 import { useCategories, useDepartments, useLocations, useAssetStatuses } from '../../../hooks/useMasterData';
 import { Asset } from '../../../types';
@@ -25,8 +25,17 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
     departmentId: '',
     locationId: '',
     statusId: '',
+    statusId: '',
     purchaseCost: '',
+    cpu: '',
+    ram: '',
+    storage: '',
+    operatingSystem: '',
+    ipAddress: '',
+    macAddress: '',
   });
+
+  const [showSpecs, setShowSpecs] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,6 +60,12 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
         locationId: asset.locationId || '',
         statusId: asset.statusId || '',
         purchaseCost: asset.purchaseCost ? asset.purchaseCost.toString() : '',
+        cpu: asset.cpu || '',
+        ram: asset.ram || '',
+        storage: asset.storage || '',
+        operatingSystem: asset.operatingSystem || '',
+        ipAddress: asset.ipAddress || '',
+        macAddress: asset.macAddress || '',
       });
       if (asset.imageUrl) {
         setImagePreview(asset.imageUrl.startsWith('http') ? asset.imageUrl : `${API_ROOT}${asset.imageUrl}`);
@@ -93,6 +108,12 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
           locationId: formData.locationId || undefined,
           statusId: formData.statusId,
           purchaseCost: formData.purchaseCost ? parseFloat(formData.purchaseCost) : undefined,
+          cpu: formData.cpu.trim() || undefined,
+          ram: formData.ram.trim() || undefined,
+          storage: formData.storage.trim() || undefined,
+          operatingSystem: formData.operatingSystem.trim() || undefined,
+          ipAddress: formData.ipAddress.trim() || undefined,
+          macAddress: formData.macAddress.trim() || undefined,
           imageUrl: imageUrl,
         }
       });
@@ -295,8 +316,90 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
                       ))}
                     </select>
                   </div>
+                  </div>
                 </div>
-              </div>
+                
+                {/* Specs Accordion */}
+                <div className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => setShowSpecs(!showSpecs)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <Cpu size={18} className="text-gray-500 dark:text-gray-400" />
+                      Thông số kỹ thuật & Mạng (Tùy chọn)
+                    </div>
+                    {showSpecs ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </button>
+                  
+                  {showSpecs && (
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-4 bg-white dark:bg-gray-900 transition-colors">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CPU</label>
+                          <input 
+                            type="text" 
+                            value={formData.cpu}
+                            onChange={e => setFormData({...formData, cpu: e.target.value})}
+                            placeholder="VD: Intel Core i7-12700H"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">RAM</label>
+                          <input 
+                            type="text" 
+                            value={formData.ram}
+                            onChange={e => setFormData({...formData, ram: e.target.value})}
+                            placeholder="VD: 16GB DDR5"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ổ cứng (Storage)</label>
+                          <input 
+                            type="text" 
+                            value={formData.storage}
+                            onChange={e => setFormData({...formData, storage: e.target.value})}
+                            placeholder="VD: 512GB SSD NVMe"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hệ điều hành</label>
+                          <input 
+                            type="text" 
+                            value={formData.operatingSystem}
+                            onChange={e => setFormData({...formData, operatingSystem: e.target.value})}
+                            placeholder="VD: Windows 11 Pro"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Địa chỉ IP</label>
+                          <input 
+                            type="text" 
+                            value={formData.ipAddress}
+                            onChange={e => setFormData({...formData, ipAddress: e.target.value})}
+                            placeholder="VD: 192.168.1.100"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Địa chỉ MAC</label>
+                          <input 
+                            type="text" 
+                            value={formData.macAddress}
+                            onChange={e => setFormData({...formData, macAddress: e.target.value})}
+                            placeholder="VD: 00:1B:44:11:3A:B7"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
             </form>
           ) : (
             <div className="space-y-6">
