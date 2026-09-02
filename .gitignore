@@ -51,7 +51,7 @@ apps/api/cmd/seed_demo/
 
 # uploads
 upload/
-
+apps/api/uploads/
 
 # docs
 docs/
