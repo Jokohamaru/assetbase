@@ -48,3 +48,6 @@ apps/api/cmd/seed_demo/
 # testing 
 *.sh
 *.txt
+
+# uploads
+upload/
