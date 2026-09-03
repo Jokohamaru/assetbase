@@ -55,3 +55,6 @@ apps/api/uploads/
 
 # docs
 docs/
+
+# scratch
+apps/api/scratch.js
