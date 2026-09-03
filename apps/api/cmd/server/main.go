@@ -58,18 +58,18 @@ func main() {
 	// Setup Services and Handlers
 	authService := service.NewAuthService(cfg)
 	authHandler := handler.NewAuthHandler(authService)
-	
+
 	masterDataService := service.NewMasterDataService()
 	masterDataHandler := handler.NewMasterDataHandler(masterDataService)
-	
+
 	adminHandler := handler.NewAdminHandler()
-	
+
 	assetService := service.NewAssetService()
 	assetHandler := handler.NewAssetHandler(assetService)
-	
+
 	lifecycleService := service.NewLifecycleService()
 	lifecycleHandler := handler.NewLifecycleHandler(lifecycleService)
-	
+
 	historyService := service.NewHistoryService()
 	historyHandler := handler.NewHistoryHandler(historyService)
 
@@ -109,16 +109,16 @@ func main() {
 			protected.GET("/auth/me", authHandler.GetMe)
 			protected.PUT("/auth/password", authHandler.ChangePassword)
 			protected.GET("/history", historyHandler.ListHistory)
-			
+
 			// Upload route
 			protected.POST("/upload", uploadHandler.UploadImage)
-			
+
 			// Dashboard routes
 			dashboard := protected.Group("/dashboard")
 			{
 				dashboard.GET("/metrics", dashboardHandler.GetMetrics)
 			}
-			
+
 			// Asset routes
 			assets := protected.Group("/assets")
 			{
@@ -127,12 +127,12 @@ func main() {
 				assets.POST("", assetHandler.CreateAsset)
 				assets.PUT("/:id", assetHandler.UpdateAsset)
 				assets.DELETE("/:id", assetHandler.DeleteAsset)
-				
+
 				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
 				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)
 				assets.POST("/:id/transfer", lifecycleHandler.TransferAsset)
 			}
-			
+
 			// Inventory routes
 			inventories := protected.Group("/inventories")
 			{
@@ -142,7 +142,7 @@ func main() {
 				inventories.POST("/:id/scan", inventoryHandler.ScanItem)
 				inventories.PUT("/:id/close", inventoryHandler.CloseSession)
 			}
-			
+
 			// Import routes
 			imports := protected.Group("/imports")
 			{
@@ -174,7 +174,7 @@ func main() {
 				entitlements.PATCH("/:id/assignments/:aId", digitalHandler.RevokeAssignment)
 				entitlements.POST("/:id/renewals", digitalHandler.RenewEntitlement)
 			}
-			
+
 			// Vendors routes
 			vendors := protected.Group("/vendors")
 			{
@@ -184,7 +184,7 @@ func main() {
 				vendors.PUT("/:id", vendorHandler.UpdateVendor)
 				vendors.POST("/:id/evaluate", vendorHandler.EvaluateVendor)
 			}
-			
+
 			// Risk Assessment routes
 			risks := protected.Group("/risk-assessments")
 			{
@@ -199,32 +199,33 @@ func main() {
 			{
 				riskItems.PUT("/:itemId/treatment", riskHandler.UpdateRiskTreatment)
 			}
-			
+
 			// Admin routes
 			admin := protected.Group("/admin")
 			admin.Use(middleware.RequireRole("ADMIN"))
 			{
 				admin.GET("/departments", masterDataHandler.ListDepartments)
 				admin.POST("/departments", masterDataHandler.CreateDepartment)
-				
+
 				admin.GET("/locations", masterDataHandler.ListLocations)
 				admin.POST("/locations", masterDataHandler.CreateLocation)
-				
+
 				admin.GET("/categories", masterDataHandler.ListCategories)
 				admin.POST("/categories", masterDataHandler.CreateCategory)
 				admin.DELETE("/categories/:id", masterDataHandler.DeleteCategory)
-				
+
 				admin.GET("/manufacturers", masterDataHandler.ListManufacturers)
 				admin.POST("/manufacturers", masterDataHandler.CreateManufacturer)
-				
+
 				admin.GET("/models", masterDataHandler.ListModels)
 				admin.POST("/models", masterDataHandler.CreateModel)
-				
+
 				admin.GET("/warehouses", masterDataHandler.ListWarehouses)
 				admin.POST("/warehouses", masterDataHandler.CreateWarehouse)
-				
+
 				admin.GET("/asset-statuses", masterDataHandler.ListAssetStatuses)
-				
+				admin.GET("/people", masterDataHandler.ListPeople)
+
 				admin.GET("/users", adminHandler.ListUsers)
 				admin.POST("/users", adminHandler.CreateUser)
 				admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)

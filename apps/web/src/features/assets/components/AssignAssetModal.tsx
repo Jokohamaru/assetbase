@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, UserPlus, AlertCircle, Calendar } from 'lucide-react';
 import { useAssignAsset } from '../../../hooks/useAssets';
-import { useUsers, useDepartments, useLocations } from '../../../hooks/useMasterData';
+import { usePeople, useDepartments, useLocations } from '../../../hooks/useMasterData';
 import { Asset } from '../../../types';
 
 interface AssignAssetModalProps {
@@ -22,7 +22,7 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
   });
   const [error, setError] = useState<string | null>(null);
 
-  const { data: users = [] } = useUsers();
+  const { data: people = [] } = usePeople();
   const { data: departments = [] } = useDepartments();
   const { data: locations = [] } = useLocations();
   const assignAsset = useAssignAsset();
@@ -77,7 +77,7 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
               Đang thao tác trên: <b className="text-gray-900">{asset.name}</b> ({asset.assetTag})
             </p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -103,23 +103,23 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
               <label className="block text-sm font-medium text-gray-700 mb-2">Hình thức giao tài sản</label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="type" 
+                  <input
+                    type="radio"
+                    name="type"
                     value="ASSIGNMENT"
                     checked={formData.type === 'ASSIGNMENT'}
-                    onChange={e => setFormData({...formData, type: e.target.value})}
+                    onChange={e => setFormData({ ...formData, type: e.target.value })}
                     className="text-indigo-600 focus:ring-indigo-600"
                   />
                   <span className="text-sm text-gray-900">Cấp phát cố định</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="type" 
+                  <input
+                    type="radio"
+                    name="type"
                     value="LOAN"
                     checked={formData.type === 'LOAN'}
-                    onChange={e => setFormData({...formData, type: e.target.value})}
+                    onChange={e => setFormData({ ...formData, type: e.target.value })}
                     className="text-indigo-600 focus:ring-indigo-600"
                   />
                   <span className="text-sm text-gray-900">Cho mượn tạm thời</span>
@@ -130,14 +130,14 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Người nhận tài sản <span className="text-rose-500">*</span></label>
-                <select 
+                <select
                   value={formData.assignedToId}
-                  onChange={e => setFormData({...formData, assignedToId: e.target.value})}
+                  onChange={e => setFormData({ ...formData, assignedToId: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
                 >
                   <option value="">-- Chọn người nhận --</option>
-                  {users.map((u: any) => (
-                    <option key={u.id} value={u.id}>{u.fullName} ({u.email})</option>
+                  {people.map((p: any) => (
+                    <option key={p.id} value={p.id}>{p.fullName} ({p.email || p.employeeCode})</option>
                   ))}
                 </select>
               </div>
@@ -149,10 +149,10 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                       <Calendar size={16} />
                     </div>
-                    <input 
+                    <input
                       type="date"
                       value={formData.expectedReturnDate}
-                      onChange={e => setFormData({...formData, expectedReturnDate: e.target.value})}
+                      onChange={e => setFormData({ ...formData, expectedReturnDate: e.target.value })}
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
                     />
                   </div>
@@ -161,9 +161,9 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phòng ban sử dụng <span className="text-rose-500">*</span></label>
-                <select 
+                <select
                   value={formData.departmentId}
-                  onChange={e => setFormData({...formData, departmentId: e.target.value})}
+                  onChange={e => setFormData({ ...formData, departmentId: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
                 >
                   <option value="">-- Chọn phòng ban --</option>
@@ -175,9 +175,9 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Vị trí sử dụng <span className="text-rose-500">*</span></label>
-                <select 
+                <select
                   value={formData.locationId}
-                  onChange={e => setFormData({...formData, locationId: e.target.value})}
+                  onChange={e => setFormData({ ...formData, locationId: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white"
                 >
                   <option value="">-- Chọn vị trí --</option>
@@ -189,10 +189,10 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tình trạng tài sản khi giao <span className="text-rose-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.conditionOut}
-                  onChange={e => setFormData({...formData, conditionOut: e.target.value})}
+                  onChange={e => setFormData({ ...formData, conditionOut: e.target.value })}
                   placeholder="VD: Máy tốt, có xước dăm"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm"
                 />
@@ -200,9 +200,9 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú thêm</label>
-                <textarea 
+                <textarea
                   value={formData.note}
-                  onChange={e => setFormData({...formData, note: e.target.value})}
+                  onChange={e => setFormData({ ...formData, note: e.target.value })}
                   placeholder="Ghi chú về việc cấp phát tài sản này..."
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm resize-none"
@@ -214,14 +214,14 @@ export function AssignAssetModal({ isOpen, onClose, asset }: AssignAssetModalPro
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3">
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Hủy bỏ
           </button>
-          <button 
+          <button
             type="submit"
             form="assign-asset-form"
             disabled={assignAsset.isPending}

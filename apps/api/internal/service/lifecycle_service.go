@@ -22,8 +22,14 @@ func (s *LifecycleService) AssignAsset(ctx context.Context, assetID string, acto
 		return nil, errors.New("asset not found")
 	}
 
-	// We should check if it's assignable based on status, but let's assume it is for now.
-
+	// Check if asset is READY
+	assetStatus, err := database.Client.AssetStatus.FindUnique(db.AssetStatus.ID.Equals(asset.StatusID)).Exec(ctx)
+	if err != nil {
+		return nil, errors.New("asset status could not be loaded")
+	}
+	if assetStatus.Code != "READY" {
+		return nil, errors.New("asset is not in READY status to be assigned")
+	}
 	assignType := db.AssetAssignmentTypeAssignment
 	if req.Type == "LOAN" {
 		assignType = db.AssetAssignmentTypeLoan

@@ -140,8 +140,8 @@ export function AssetBookPage() {
               key={group.id}
               onClick={() => setActiveTab(group.id)}
               className={`flex items-center gap-3 min-w-[160px] p-4 rounded-xl border text-left transition-all ${isActive
-                  ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/30 ring-1 ring-indigo-600 dark:ring-indigo-500 shadow-sm'
-                  : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/30 ring-1 ring-indigo-600 dark:ring-indigo-500 shadow-sm'
+                : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 }`}
             >
               <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
@@ -309,7 +309,7 @@ export function AssetBookPage() {
                         >
                           <Edit3 size={16} />
                         </button>
-                        {a.status?.code === 'IN_USE' ? (
+                        {a.status?.code === 'ACTIVE' ? (
                           <button
                             onClick={() => setSelectedAssetForReturn(a)}
                             className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors"
@@ -317,7 +317,7 @@ export function AssetBookPage() {
                           >
                             <UserMinus size={16} />
                           </button>
-                        ) : (
+                        ) : a.status?.code === 'READY' ? (
                           <button
                             onClick={() => setSelectedAssetForAssign(a)}
                             className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
@@ -325,7 +325,7 @@ export function AssetBookPage() {
                           >
                             <UserPlus size={16} />
                           </button>
-                        )}
+                        ) : null}
                         <button
                           onClick={() => setSelectedAssetForPrint(a)}
                           className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"

@@ -71,6 +71,16 @@ export function useWarehouses() {
   });
 }
 
+export function usePeople() {
+  return useQuery({
+    queryKey: ['people'],
+    queryFn: async () => {
+      const response = await apiClient.get('/admin/people');
+      return response.data.data || [];
+    }
+  });
+}
+
 export function useCreateUser() {
   const queryClient = useQueryClient();
   return useMutation({

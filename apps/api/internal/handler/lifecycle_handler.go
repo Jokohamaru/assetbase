@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/Jokohamaru/assetbase/internal/dto"
 	"github.com/Jokohamaru/assetbase/internal/service"
@@ -28,7 +29,13 @@ func (h *LifecycleHandler) AssignAsset(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	data, err := h.Service.AssignAsset(c.Request.Context(), id, userID.(string), req)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		errMsg := err.Error()
+		// Validation errors should return 400
+		if strings.Contains(errMsg, "not found") || strings.Contains(errMsg, "not in READY status") || strings.Contains(errMsg, "could not be loaded") {
+			response.Error(c, http.StatusBadRequest, errMsg)
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, errMsg)
 		return
 	}
 	response.Success(c, data)

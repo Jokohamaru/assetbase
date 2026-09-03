@@ -161,3 +161,10 @@ func (s *MasterDataService) ListAssetStatuses(ctx context.Context) ([]db.AssetSt
 		db.AssetStatus.SortOrder.Order(db.SortOrderAsc),
 	).Exec(ctx)
 }
+
+// People
+func (s *MasterDataService) ListPeople(ctx context.Context) ([]db.PersonModel, error) {
+	return database.Client.Person.FindMany(
+		db.Person.Status.Equals(db.RecordStatusActive),
+	).Exec(ctx)
+}
