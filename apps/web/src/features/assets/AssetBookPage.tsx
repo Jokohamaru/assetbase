@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, Laptop, Monitor, Smartphone, Printer, Server, 
-  Search, Building2, Filter, ChevronDown, Plus, 
+import {
+  Box, Laptop, Monitor, Smartphone, Printer, Server,
+  Search, Building2, Filter, ChevronDown, Plus,
   Download, Upload, UserPlus, UserMinus, QrCode, Pencil, Trash2, Edit3, Eye
 } from 'lucide-react';
 import { useAssets, useDeleteAsset } from '../../hooks/useAssets';
 import { useDashboardMetrics } from '../../hooks/useDashboard';
-import { useDepartments } from '../../hooks/useMasterData';
+import { useDepartments, useCategories } from '../../hooks/useMasterData';
 import { AddAssetModal } from './components/AddAssetModal';
 import { AssignAssetModal } from './components/AssignAssetModal';
 import { ReturnAssetModal } from './components/ReturnAssetModal';
@@ -40,8 +40,9 @@ export function AssetBookPage() {
     search: searchQuery || undefined,
     status: status || undefined
   });
-  
+
   const { data: departments = [] } = useDepartments();
+  const { data: categories = [] } = useCategories();
   const deleteMutation = useDeleteAsset();
 
   const handleDelete = () => {
@@ -54,12 +55,27 @@ export function AssetBookPage() {
     }
   };
 
+  // Map category names to icons
+  const getCategoryIcon = (categoryName: string) => {
+    const name = categoryName.toLowerCase();
+    if (name.includes('laptop')) return Laptop;
+    if (name.includes('pc') || name.includes('desktop') || name.includes('màn hình')) return Monitor;
+    if (name.includes('mobile') || name.includes('điện thoại') || name.includes('tablet')) return Smartphone;
+    if (name.includes('server') || name.includes('máy chủ') || name.includes('network') || name.includes('mạng') || name.includes('switch') || name.includes('router')) return Server;
+    if (name.includes('print') || name.includes('máy in')) return Printer;
+    return Box;
+  };
+
+  const dynamicGroups = categories.map((c: any) => ({
+    id: c.name,
+    label: c.name,
+    count: assets.filter((a: any) => a.category?.id === c.id).length,
+    icon: getCategoryIcon(c.name)
+  }));
+
   const assetGroups = [
     { id: 'all', label: 'Tất cả', count: metricsData?.totalAssets || 0, icon: Box },
-    { id: 'Laptop', label: 'Laptop', count: assets.filter((a: any) => a.category?.name === 'Laptop').length, icon: Laptop },
-    { id: 'PC / Desktop', label: 'PC', count: assets.filter((a: any) => a.category?.name === 'PC / Desktop').length, icon: Monitor },
-    { id: 'Mobile', label: 'Mobile', count: assets.filter((a: any) => a.category?.name === 'Mobile').length, icon: Smartphone },
-    { id: 'Server', label: 'Máy chủ / Mạng', count: assets.filter((a: any) => ['Server', 'Switch', 'Router / Wi-Fi'].includes(a.category?.name)).length, icon: Server },
+    ...dynamicGroups
   ];
 
   return (
@@ -77,7 +93,7 @@ export function AssetBookPage() {
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             <Download size={16} /> Xuất Excel
           </button>
-          <button 
+          <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
           >
@@ -90,6 +106,10 @@ export function AssetBookPage() {
       <div className="flex flex-wrap gap-4 text-sm font-medium">
         <div className="px-4 py-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
           <span className="text-gray-900 dark:text-gray-100 font-bold">{metricsData?.totalAssets || 0}</span> <span className="text-gray-500 dark:text-gray-400">tài sản</span>
+        </div>
+        <div className="px-4 py-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-2 transition-colors">
+          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span className="text-gray-900 dark:text-gray-100 font-bold">{metricsData?.readyAssets || 0}</span> <span className="text-gray-500 dark:text-gray-400">sẵn sàng</span>
         </div>
         <div className="px-4 py-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm flex items-center gap-2 transition-colors">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -109,11 +129,10 @@ export function AssetBookPage() {
             <button
               key={group.id}
               onClick={() => setActiveTab(group.id)}
-              className={`flex items-center gap-3 min-w-[160px] p-4 rounded-xl border text-left transition-all ${
-                isActive 
-                  ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/30 ring-1 ring-indigo-600 dark:ring-indigo-500 shadow-sm' 
+              className={`flex items-center gap-3 min-w-[160px] p-4 rounded-xl border text-left transition-all ${isActive
+                  ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/30 ring-1 ring-indigo-600 dark:ring-indigo-500 shadow-sm'
                   : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-              }`}
+                }`}
             >
               <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
                 <group.icon size={20} />
@@ -135,11 +154,11 @@ export function AssetBookPage() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
               <Search size={18} />
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Tìm mã, tên, serial, người sử dụng..." 
+              placeholder="Tìm mã, tên, serial, người sử dụng..."
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
             />
           </div>
@@ -148,7 +167,7 @@ export function AssetBookPage() {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <Building2 size={16} />
               </div>
-              <select 
+              <select
                 value={department}
                 onChange={e => setDepartment(e.target.value)}
                 className="block w-full pl-9 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm appearance-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
@@ -165,7 +184,7 @@ export function AssetBookPage() {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <Filter size={16} />
               </div>
-              <select 
+              <select
                 value={status}
                 onChange={e => setStatus(e.target.value)}
                 className="block w-full pl-9 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm appearance-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
@@ -266,47 +285,47 @@ export function AssetBookPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                        <button
                           onClick={() => navigate(`/assets/${a.id}`)}
-                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
                           title="Xem chi tiết thiết bị"
                         >
                           <Eye size={16} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => setSelectedAssetForEdit(a)}
-                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
                           title="Chỉnh sửa tài sản"
                         >
                           <Edit3 size={16} />
                         </button>
                         {a.status?.code === 'IN_USE' ? (
-                          <button 
+                          <button
                             onClick={() => setSelectedAssetForReturn(a)}
-                            className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors" 
+                            className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors"
                             title="Thu hồi tài sản"
                           >
                             <UserMinus size={16} />
                           </button>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => setSelectedAssetForAssign(a)}
-                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
                             title="Cấp phát tài sản"
                           >
                             <UserPlus size={16} />
                           </button>
                         )}
-                        <button 
+                        <button
                           onClick={() => setSelectedAssetForPrint(a)}
-                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors" 
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
                           title="In Barcode / QR"
                         >
                           <QrCode size={16} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => setSelectedAssetForDelete(a)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" 
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                           title="Xóa"
                         >
                           <Trash2 size={16} />
@@ -319,34 +338,34 @@ export function AssetBookPage() {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between transition-colors">
           <span className="text-sm text-gray-600 dark:text-gray-400 transition-colors">Hiển thị <b className="text-gray-900 dark:text-gray-100">{Math.min(assets.length, page * 10)}</b> trên <b className="text-gray-900 dark:text-gray-100">{assets.length}</b> tài sản</span>
           <div className="flex gap-1">
-            <button 
+            <button
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
               className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Trước</button>
             <button className="px-3 py-1 border border-indigo-600 dark:border-indigo-500 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-medium transition-colors">{page}</button>
-            <button 
+            <button
               disabled={page * 10 >= assets.length}
               onClick={() => setPage(p => p + 1)}
               className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Tiếp</button>
           </div>
         </div>
       </div>
-      
+
       {/* Modals */}
       <AddAssetModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-      <AssignAssetModal 
-        isOpen={selectedAssetForAssign !== null} 
+      <AssignAssetModal
+        isOpen={selectedAssetForAssign !== null}
         asset={selectedAssetForAssign}
-        onClose={() => setSelectedAssetForAssign(null)} 
+        onClose={() => setSelectedAssetForAssign(null)}
       />
-      <ReturnAssetModal 
-        isOpen={!!selectedAssetForReturn} 
-        onClose={() => setSelectedAssetForReturn(null)} 
+      <ReturnAssetModal
+        isOpen={!!selectedAssetForReturn}
+        onClose={() => setSelectedAssetForReturn(null)}
         asset={selectedAssetForReturn}
       />
 
@@ -359,9 +378,9 @@ export function AssetBookPage() {
       />
 
       {selectedAssetForPrint && (
-        <BarcodePrintModal 
-          asset={selectedAssetForPrint} 
-          onClose={() => setSelectedAssetForPrint(null)} 
+        <BarcodePrintModal
+          asset={selectedAssetForPrint}
+          onClose={() => setSelectedAssetForPrint(null)}
         />
       )}
       <ConfirmDeleteModal

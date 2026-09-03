@@ -40,6 +40,15 @@ export function AddAssetModal({ isOpen, onClose }: AddAssetModalProps) {
   const createAsset = useCreateAsset();
   const uploadFile = useUploadFile();
 
+  React.useEffect(() => {
+    if (isOpen && statuses.length > 0 && !formData.statusId) {
+      const readyStatus = statuses.find((s: any) => s.code === 'READY');
+      if (readyStatus) {
+        setFormData(prev => ({ ...prev, statusId: readyStatus.id }));
+      }
+    }
+  }, [isOpen, statuses, formData.statusId]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {

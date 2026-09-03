@@ -37,6 +37,18 @@ func (s *DashboardService) GetMetrics(ctx context.Context) (*dto.DashboardMetric
 	}
 	inUseCount := len(inUseAssets)
 
+	// Ready Assets
+	readyAssets, err := database.Client.Asset.FindMany(
+		db.Asset.DeletedAt.IsNull(),
+		db.Asset.Status.Where(
+			db.AssetStatus.Code.Equals("READY"),
+		),
+	).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	readyCount := len(readyAssets)
+
 	// Attention Assets (Maintenance / Broken)
 	attentionAssets, err := database.Client.Asset.FindMany(
 		db.Asset.DeletedAt.IsNull(),
@@ -63,6 +75,7 @@ func (s *DashboardService) GetMetrics(ctx context.Context) (*dto.DashboardMetric
 	return &dto.DashboardMetricsResponse{
 		TotalAssets:     totalAssets,
 		InUseAssets:     inUseCount,
+		ReadyAssets:     readyCount,
 		AttentionAssets: attentionCount,
 		OverdueAssets:   overdueCount,
 	}, nil

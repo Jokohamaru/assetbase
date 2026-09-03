@@ -44,12 +44,21 @@ func (s *LifecycleService) AssignAsset(ctx context.Context, assetID string, acto
 		return nil, err
 	}
 
+	// Find ACTIVE status
+	activeStatus, err := database.Client.AssetStatus.FindFirst(db.AssetStatus.Code.Equals("ACTIVE")).Exec(ctx)
+	if err != nil {
+		return nil, errors.New("active status not found")
+	}
+
 	// Update Asset
-	_, err = database.Client.Asset.FindUnique(db.Asset.ID.Equals(assetID)).Update(
+	assetUpdateParams := []db.AssetSetParam{
 		db.Asset.Department.Link(db.Department.ID.Equals(req.DepartmentId)),
 		db.Asset.Location.Link(db.Location.ID.Equals(req.LocationId)),
-		// statusId should be changed to 'ASSIGNED' normally
-	).Exec(ctx)
+		db.Asset.Status.Link(db.AssetStatus.ID.Equals(activeStatus.ID)),
+		db.Asset.CurrentCustodian.Link(db.Person.ID.Equals(req.AssignedToId)),
+	}
+
+	_, err = database.Client.Asset.FindUnique(db.Asset.ID.Equals(assetID)).Update(assetUpdateParams...).Exec(ctx)
 
 	// Create History
 	_, _ = database.Client.AssetHistory.CreateOne(
