@@ -75,7 +75,17 @@ func (s *MasterDataService) DeleteCategory(ctx context.Context, id string, repla
 		_, err = database.Client.Asset.FindMany(
 			db.Asset.CategoryID.Equals(id),
 		).Update(
-			db.Asset.Category.Link(db.AssetCategory.ID.Equals(replacementCategoryId)),
+			db.Asset.CategoryID.Set(replacementCategoryId),
+		).Exec(ctx)
+		if err != nil {
+			return err
+		}
+
+		// Reassign Product Models
+		_, err = database.Client.ProductModel.FindMany(
+			db.ProductModel.CategoryID.Equals(id),
+		).Update(
+			db.ProductModel.CategoryID.Set(replacementCategoryId),
 		).Exec(ctx)
 		if err != nil {
 			return err
