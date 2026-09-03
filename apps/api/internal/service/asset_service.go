@@ -17,10 +17,50 @@ func NewAssetService() *AssetService {
 	return &AssetService{}
 }
 
-func (s *AssetService) ListAssets(ctx context.Context, page, limit int) ([]db.AssetModel, error) {
+func (s *AssetService) ListAssets(ctx context.Context, page, limit int, search, category, status, department string) ([]db.AssetModel, error) {
 	offset := (page - 1) * limit
-	return database.Client.Asset.FindMany(
+	
+	// Base condition
+	where := []db.AssetWhereParam{
 		db.Asset.DeletedAt.IsNull(),
+	}
+
+	// Dynamic filters
+	if search != "" {
+		where = append(where, db.Asset.Or(
+			db.Asset.And(
+				db.Asset.Name.Contains(search),
+				db.Asset.Name.Mode(db.QueryModeInsensitive),
+			),
+			db.Asset.And(
+				db.Asset.AssetTag.Contains(search),
+				db.Asset.AssetTag.Mode(db.QueryModeInsensitive),
+			),
+			db.Asset.And(
+				db.Asset.SerialNumber.Contains(search),
+				db.Asset.SerialNumber.Mode(db.QueryModeInsensitive),
+			),
+		))
+	}
+	
+	if category != "" {
+		where = append(where, db.Asset.Category.Where(
+			db.AssetCategory.Name.Equals(category),
+		))
+	}
+	
+	if status != "" {
+		where = append(where, db.Asset.Status.Where(
+			db.AssetStatus.Code.Equals(status),
+		))
+	}
+	
+	if department != "" {
+		where = append(where, db.Asset.DepartmentID.Equals(department))
+	}
+
+	return database.Client.Asset.FindMany(
+		where...,
 	).Skip(offset).Take(limit).With(
 		db.Asset.Category.Fetch(),
 		db.Asset.Model.Fetch(),

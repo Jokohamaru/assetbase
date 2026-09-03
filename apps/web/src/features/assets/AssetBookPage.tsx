@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Laptop, Monitor, Smartphone, Printer, Server,
@@ -23,9 +23,18 @@ export function AssetBookPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [department, setDepartment] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedAssetForAssign, setSelectedAssetForAssign] = useState<Asset | null>(null);
   const [selectedAssetForReturn, setSelectedAssetForReturn] = useState<Asset | null>(null);
@@ -37,8 +46,9 @@ export function AssetBookPage() {
 
   const { data: assets = [], isLoading } = useAssets({
     category: activeTab === 'all' ? undefined : activeTab,
-    search: searchQuery || undefined,
-    status: status || undefined
+    search: debouncedSearch || undefined,
+    status: status || undefined,
+    department: department || undefined
   });
 
   const { data: departments = [] } = useDepartments();

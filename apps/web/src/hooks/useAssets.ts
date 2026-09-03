@@ -4,7 +4,7 @@ import type { Asset } from '../types';
 
 const ASSETS_QUERY_KEY = ['assets'];
 
-export function useAssets(params?: { category?: string; status?: string; search?: string }) {
+export function useAssets(params?: { category?: string; status?: string; search?: string; department?: string }) {
   return useQuery({
     queryKey: [...ASSETS_QUERY_KEY, params],
     queryFn: async () => {
