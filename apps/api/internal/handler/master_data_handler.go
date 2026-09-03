@@ -98,6 +98,22 @@ func (h *MasterDataHandler) CreateCategory(c *gin.Context) {
 	response.Success(c, res)
 }
 
+func (h *MasterDataHandler) DeleteCategory(c *gin.Context) {
+	id := c.Param("id")
+	replacementCategoryId := c.Query("replacementCategoryId")
+
+	err := h.Service.DeleteCategory(c.Request.Context(), id, replacementCategoryId)
+	if err != nil {
+		if err.Error() == "CATEGORY_IN_USE" {
+			response.Error(c, http.StatusBadRequest, "CATEGORY_IN_USE")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Category deleted successfully"})
+}
+
 func (h *MasterDataHandler) ListManufacturers(c *gin.Context) {
 	data, err := h.Service.ListManufacturers(c.Request.Context())
 	if err != nil {

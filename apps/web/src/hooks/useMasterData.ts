@@ -83,3 +83,33 @@ export function useCreateUser() {
     }
   });
 }
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { code: string; name: string }) => {
+      const response = await apiClient.post('/admin/categories', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    }
+  });
+}
+
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, replacementCategoryId }: { id: string; replacementCategoryId?: string }) => {
+      const response = await apiClient.delete(`/admin/categories/${id}`, {
+        params: { replacementCategoryId }
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      // If categories are reassigned, we should also invalidate assets to reflect changes on AssetBookPage
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    }
+  });
+}

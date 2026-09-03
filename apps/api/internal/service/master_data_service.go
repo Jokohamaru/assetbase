@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
 	"github.com/Jokohamaru/assetbase/prisma/db"
@@ -54,6 +55,39 @@ func (s *MasterDataService) CreateCategory(ctx context.Context, code, name strin
 		db.AssetCategory.Code.Set(code),
 		db.AssetCategory.Name.Set(name),
 	).Exec(ctx)
+}
+
+func (s *MasterDataService) DeleteCategory(ctx context.Context, id string, replacementCategoryId string) error {
+	// Check if category has assets
+	assets, err := database.Client.Asset.FindMany(
+		db.Asset.CategoryID.Equals(id),
+	).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(assets) > 0 {
+		if replacementCategoryId == "" {
+			return errors.New("CATEGORY_IN_USE")
+		}
+
+		// Reassign assets
+		_, err = database.Client.Asset.FindMany(
+			db.Asset.CategoryID.Equals(id),
+		).Update(
+			db.Asset.Category.Link(db.AssetCategory.ID.Equals(replacementCategoryId)),
+		).Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Delete category
+	_, err = database.Client.AssetCategory.FindUnique(
+		db.AssetCategory.ID.Equals(id),
+	).Delete().Exec(ctx)
+
+	return err
 }
 
 // Manufacturers

@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2, User } from 'lucide-react';
 import { useDepartments, useLocations, useCategories, useManufacturers, useUsers } from '../../hooks/useMasterData';
 import { UserFormModal } from './UserFormModal';
+import { CategoryFormModal } from './CategoryFormModal';
+import { DeleteCategoryModal } from './DeleteCategoryModal';
 
 type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users';
 
 export function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<Tab>('departments');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [selectedCategoryForDelete, setSelectedCategoryForDelete] = useState<any>(null);
   
   const { data: departments = [], isLoading: isLoadingDept } = useDepartments();
   const { data: locations = [], isLoading: isLoadingLoc } = useLocations();
@@ -69,8 +73,8 @@ export function MasterDataPage() {
               onClick={() => {
                 if (activeTab === 'users') {
                   setIsUserModalOpen(true);
-                } else {
-                  // handle other tabs add
+                } else if (activeTab === 'categories') {
+                  setIsCategoryModalOpen(true);
                 }
               }}
               className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
@@ -163,9 +167,18 @@ export function MasterDataPage() {
                             <button className="text-gray-400 hover:text-indigo-600 transition-colors">
                               <Pencil size={16} />
                             </button>
-                            <button className="text-gray-400 hover:text-red-600 transition-colors">
-                              <Trash2 size={16} />
-                            </button>
+                            {activeTab === 'categories' ? (
+                              <button 
+                                onClick={() => setSelectedCategoryForDelete(item)}
+                                className="text-gray-400 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            ) : (
+                              <button className="text-gray-400 hover:text-red-600 transition-colors">
+                                <Trash2 size={16} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -177,7 +190,22 @@ export function MasterDataPage() {
           </div>
         </div>
       </div>
-      <UserFormModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+      {/* Modals */}
+      <UserFormModal 
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+      />
+      
+      <CategoryFormModal 
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+      />
+      
+      <DeleteCategoryModal 
+        isOpen={selectedCategoryForDelete !== null}
+        onClose={() => setSelectedCategoryForDelete(null)}
+        category={selectedCategoryForDelete}
+      />
     </div>
   );
 }

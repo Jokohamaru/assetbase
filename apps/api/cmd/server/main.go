@@ -212,6 +212,7 @@ func main() {
 				
 				admin.GET("/categories", masterDataHandler.ListCategories)
 				admin.POST("/categories", masterDataHandler.CreateCategory)
+				admin.DELETE("/categories/:id", masterDataHandler.DeleteCategory)
 				
 				admin.GET("/manufacturers", masterDataHandler.ListManufacturers)
 				admin.POST("/manufacturers", masterDataHandler.CreateManufacturer)
