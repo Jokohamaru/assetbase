@@ -219,7 +219,6 @@ export function AssetBookPage() {
                 <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">Tài sản</th>
                 <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">Phòng ban / Vị trí</th>
                 <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">Người sử dụng</th>
-                <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">Nguyên giá</th>
                 <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase">Trạng thái</th>
                 <th className="px-6 py-4 font-semibold text-xs tracking-wider uppercase text-right">Thao tác</th>
               </tr>
@@ -227,7 +226,7 @@ export function AssetBookPage() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800 transition-colors">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                     <div className="flex justify-center items-center gap-2">
                       <div className="w-4 h-4 rounded-full bg-indigo-600 animate-pulse"></div>
                       <div className="w-4 h-4 rounded-full bg-indigo-600 animate-pulse delay-75"></div>
@@ -237,7 +236,7 @@ export function AssetBookPage() {
                 </tr>
               ) : assets.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     <Search size={32} className="mx-auto mb-3 text-gray-400 dark:text-gray-500" />
                     <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Không tìm thấy tài sản</p>
                     <p className="mt-1">Thử thay đổi từ khóa hoặc bộ lọc để xem kết quả.</p>
@@ -282,10 +281,6 @@ export function AssetBookPage() {
                           <span className="text-gray-500 dark:text-gray-400 italic transition-colors">Chưa gán</span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900 dark:text-gray-100 transition-colors">{a.purchaseCost?.toLocaleString('vi-VN')} ₫</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 transition-colors">Mua {a.purchaseDate ? new Date(a.purchaseDate).toLocaleDateString('vi-VN') : '—'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${getStatusBadgeClasses(a.status?.color)}`}>

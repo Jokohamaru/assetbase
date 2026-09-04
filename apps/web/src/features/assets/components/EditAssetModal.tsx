@@ -126,7 +126,7 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
 
   const currentStatus = statuses.find((s: any) => s.id === formData.statusId);
   const isReady = currentStatus?.code === 'READY';
-  const isInUse = currentStatus?.code === 'IN_USE';
+  const isInUse = currentStatus?.code === 'ACTIVE';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity">
@@ -221,13 +221,21 @@ export function EditAssetModal({ isOpen, onClose, asset, onAssign, onReturn }: E
                     <select 
                       value={formData.statusId}
                       onChange={e => setFormData({...formData, statusId: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                      disabled={asset.status?.code === 'ACTIVE'}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed"
                     >
                       <option value="">-- Chọn trạng thái --</option>
-                      {statuses.map((s: any) => (
+                      {statuses
+                        .filter((s: any) => asset.status?.code === 'ACTIVE' || s.code !== 'ACTIVE')
+                        .map((s: any) => (
                         <option key={s.id} value={s.id}>{s.name}</option>
                       ))}
                     </select>
+                    {asset.status?.code === 'ACTIVE' && (
+                      <p className="mt-1 text-xs text-rose-500">
+                        Tài sản đang được cấp phát. Vui lòng dùng tính năng Thu hồi thiết bị.
+                      </p>
+                    )}
                   </div>
                 </div>
 
