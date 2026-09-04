@@ -246,7 +246,7 @@ func (s *AssetService) UpdateAsset(ctx context.Context, actorID string, id strin
 		}
 	}
 	if req.StatusId != nil && *req.StatusId != existing.StatusID {
-		if existing.Status().Code == "ACTIVE" {
+		if existing.Status().Code == "IN_USE" {
 			return nil, errors.New("Tài sản đang được cấp phát. Vui lòng sử dụng tính năng Thu hồi để đổi trạng thái")
 		}
 
@@ -256,7 +256,7 @@ func (s *AssetService) UpdateAsset(ctx context.Context, actorID string, id strin
 		if err != nil {
 			return nil, errors.New("Trạng thái không hợp lệ")
 		}
-		if newStatus.Code == "ACTIVE" {
+		if newStatus.Code == "IN_USE" {
 			return nil, errors.New("Vui lòng sử dụng chức năng Cấp phát để đổi trạng thái thành Đang sử dụng")
 		}
 

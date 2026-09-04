@@ -69,7 +69,7 @@ export function AssetDetailPage() {
             </p>
           </div>
         </div>
-        {asset.status?.code === 'ACTIVE' && (
+        {asset.status?.code === 'IN_USE' && (
           <button 
             onClick={() => setIsReturnModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"

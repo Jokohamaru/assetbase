@@ -58,3 +58,6 @@ docs/
 
 # scratch
 apps/api/scratch.js
+
+# cmd update status
+apps/api/cmd/update_status

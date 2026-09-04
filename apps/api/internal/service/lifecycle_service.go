@@ -51,8 +51,8 @@ func (s *LifecycleService) AssignAsset(ctx context.Context, assetID string, acto
 		return nil, err
 	}
 
-	// Find ACTIVE status
-	activeStatus, err := database.Client.AssetStatus.FindFirst(db.AssetStatus.Code.Equals("ACTIVE")).Exec(ctx)
+	// Find IN_USE status
+	activeStatus, err := database.Client.AssetStatus.FindFirst(db.AssetStatus.Code.Equals("IN_USE")).Exec(ctx)
 	if err != nil {
 		return nil, errors.New("active status not found")
 	}

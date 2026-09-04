@@ -29,7 +29,7 @@ func (s *DashboardService) GetMetrics(ctx context.Context) (*dto.DashboardMetric
 	inUseAssets, err := database.Client.Asset.FindMany(
 		db.Asset.DeletedAt.IsNull(),
 		db.Asset.Status.Where(
-			db.AssetStatus.Code.Equals("ACTIVE"),
+			db.AssetStatus.Code.Equals("IN_USE"),
 		),
 	).Exec(ctx)
 	if err != nil {

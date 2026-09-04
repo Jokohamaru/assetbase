@@ -304,8 +304,8 @@ export function AssetBookPage() {
                         >
                           <Edit3 size={16} />
                         </button>
-                        {a.status?.code === 'ACTIVE' ? (
-                          <button
+                        {a.status?.code === 'IN_USE' ? (
+                          <button 
                             onClick={() => setSelectedAssetForReturn(a)}
                             className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors"
                             title="Thu hồi tài sản"
