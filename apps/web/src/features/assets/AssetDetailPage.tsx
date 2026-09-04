@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Box, CheckCircle, Clock, MapPin, Monitor, Server, Tag, User, Cpu, HardDrive, Calendar, AlertCircle, Plus, UserMinus } from 'lucide-react';
 import { useAsset } from '../../hooks/useAssets';
 import { getStatusBadgeClasses, getStatusDotClasses } from '../../utils/theme';
+import { ReturnAssetModal } from './components/ReturnAssetModal';
 
 const API_ROOT = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8080';
 
@@ -10,6 +11,7 @@ export function AssetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: asset, isLoading, error } = useAsset(id!);
   const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'history'>('overview');
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -40,31 +42,42 @@ export function AssetDetailPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header / Breadcrumb */}
-      <div className="flex items-center gap-3">
-        <Link 
-          to="/assets"
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </Link>
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{asset.name}</h1>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border inline-flex items-center ${statusColor}`}>
-              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDotClasses(asset.status?.color)}`}></span>
-              {asset.status?.name || '---'}
-            </span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link 
+            to="/assets"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{asset.name}</h1>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border inline-flex items-center ${statusColor}`}>
+                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDotClasses(asset.status?.color)}`}></span>
+                {asset.status?.name || '---'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2">
+              <Tag size={14} /> {asset.assetTag}
+              {asset.serialNumber && (
+                <>
+                  <span className="text-gray-300 dark:text-gray-600">|</span> 
+                  SN: {asset.serialNumber}
+                </>
+              )}
+            </p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2">
-            <Tag size={14} /> {asset.assetTag}
-            {asset.serialNumber && (
-              <>
-                <span className="text-gray-300 dark:text-gray-600">|</span> 
-                SN: {asset.serialNumber}
-              </>
-            )}
-          </p>
         </div>
+        {asset.status?.code === 'ACTIVE' && (
+          <button 
+            onClick={() => setIsReturnModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
+          >
+            <UserMinus size={16} />
+            Thu hồi thiết bị
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -321,6 +334,12 @@ export function AssetDetailPage() {
           </div>
         </div>
       </div>
+
+      <ReturnAssetModal 
+        isOpen={isReturnModalOpen} 
+        onClose={() => setIsReturnModalOpen(false)} 
+        asset={asset} 
+      />
     </div>
   );
 }

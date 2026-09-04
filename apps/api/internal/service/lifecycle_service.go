@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
 	"github.com/Jokohamaru/assetbase/internal/dto"
@@ -117,30 +118,49 @@ func (s *LifecycleService) ReturnAsset(ctx context.Context, assetID string, acto
 	// Close Assignment
 	_, err = database.Client.AssetAssignment.FindUnique(db.AssetAssignment.ID.Equals(assignment.ID)).Update(
 		db.AssetAssignment.Status.Set(db.AssetAssignmentStatusClosed),
+		db.AssetAssignment.ClosedAt.Set(time.Now()),
 	).Exec(ctx)
 
 	// Create Return
+	var optionalParams []db.AssetReturnSetParam
+
+	if req.WarehouseId != nil && *req.WarehouseId != "" {
+		optionalParams = append(optionalParams, db.AssetReturn.Warehouse.Link(db.Warehouse.ID.Equals(*req.WarehouseId)))
+	}
+	if req.Note != nil && *req.Note != "" {
+		optionalParams = append(optionalParams, db.AssetReturn.Note.Set(*req.Note))
+	}
+
 	returnRecord, err := database.Client.AssetReturn.CreateOne(
-		db.AssetReturn.ReturnNo.Set("RTN-"+asset.AssetTag),
+		db.AssetReturn.ReturnNo.Set("RTN-" + asset.AssetTag),
 		db.AssetReturn.ConditionIn.Set(req.ConditionIn),
 		db.AssetReturn.Outcome.Set(outcome),
 		db.AssetReturn.Assignment.Link(db.AssetAssignment.ID.Equals(assignment.ID)),
 		db.AssetReturn.Asset.Link(db.Asset.ID.Equals(assetID)),
 		db.AssetReturn.Location.Link(db.Location.ID.Equals(req.LocationId)),
 		db.AssetReturn.Actor.Link(db.User.ID.Equals(actorID)),
+		optionalParams...,
 	).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update Asset
-	_, err = database.Client.Asset.FindUnique(db.Asset.ID.Equals(assetID)).Update(
+	assetUpdateParams := []db.AssetSetParam{
 		db.Asset.Location.Link(db.Location.ID.Equals(req.LocationId)),
 		db.Asset.Status.Link(db.AssetStatus.ID.Equals(status.ID)),
 		db.Asset.AssignedUser.Unlink(),
 		db.Asset.CurrentCustodian.Unlink(),
 		db.Asset.Department.Unlink(),
-	).Exec(ctx)
+	}
+
+	if req.WarehouseId != nil && *req.WarehouseId != "" {
+		assetUpdateParams = append(assetUpdateParams, db.Asset.Warehouse.Link(db.Warehouse.ID.Equals(*req.WarehouseId)))
+	} else {
+		assetUpdateParams = append(assetUpdateParams, db.Asset.Warehouse.Unlink())
+	}
+
+	_, err = database.Client.Asset.FindUnique(db.Asset.ID.Equals(assetID)).Update(assetUpdateParams...).Exec(ctx)
 
 	// Create History
 	_, _ = database.Client.AssetHistory.CreateOne(
