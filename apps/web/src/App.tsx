@@ -20,6 +20,8 @@ import { VendorListPage } from './features/vendors/VendorListPage';
 import { VendorDetailPage } from './features/vendors/VendorDetailPage';
 import { RiskListPage } from './features/risks/RiskListPage';
 import { RiskDetailPage } from './features/risks/RiskDetailPage';
+import { MyAssetsPage } from './features/user-portal/MyAssetsPage';
+import { MyIncidentsPage } from './features/user-portal/MyIncidentsPage';
 import type { AppUser, BrandingSettings } from './types';
 
 export default function App() {
@@ -72,7 +74,13 @@ export default function App() {
   return (
     <Routes>
       <Route element={<MainLayout user={currentUser} branding={branding} logout={handleLogout} />}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to={currentUser.role === 'ADMIN' ? "/dashboard" : "/my-assets"} replace />} />
+        
+        {/* User Routes */}
+        <Route path="/my-assets" element={<MyAssetsPage />} />
+        <Route path="/my-incidents" element={<MyIncidentsPage />} />
+
+        {/* Admin Routes */}
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assets" element={<AssetBookPage />} />
         <Route path="/assets/:id" element={<AssetDetailPage />} />

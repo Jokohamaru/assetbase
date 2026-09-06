@@ -37,8 +37,10 @@ func (h *IncidentHandler) CreateIncident(c *gin.Context) {
 
 func (h *IncidentHandler) ListIncidents(c *gin.Context) {
 	status := c.Query("status")
+	my := c.Query("my") == "true"
+	userID := c.GetString("user_id")
 	
-	incidents, err := h.Service.ListIncidents(c.Request.Context(), status)
+	incidents, err := h.Service.ListIncidents(c.Request.Context(), status, my, userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

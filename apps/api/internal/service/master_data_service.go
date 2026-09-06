@@ -166,5 +166,56 @@ func (s *MasterDataService) ListAssetStatuses(ctx context.Context) ([]db.AssetSt
 func (s *MasterDataService) ListPeople(ctx context.Context) ([]db.PersonModel, error) {
 	return database.Client.Person.FindMany(
 		db.Person.Status.Equals(db.RecordStatusActive),
+	).
+		With(
+			db.Person.Department.Fetch(),
+			db.Person.Location.Fetch(),
+			db.Person.LinkedUser.Fetch(),
+		).
+		Exec(ctx)
+}
+
+func (s *MasterDataService) DeletePerson(ctx context.Context, id string) error {
+	// Check if the person is holding any assets
+	assetCount, err := database.Client.Asset.FindMany(
+		db.Asset.CurrentCustodianID.Equals(id),
 	).Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	if len(assetCount) > 0 {
+		return errors.New("PERSON_HAS_ASSETS")
+	}
+
+	// Fetch person to get linked user
+	person, err := database.Client.Person.FindUnique(
+		db.Person.ID.Equals(id),
+	).Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	// Soft delete the person
+	_, err = database.Client.Person.FindUnique(
+		db.Person.ID.Equals(id),
+	).Update(
+		db.Person.Status.Set(db.RecordStatusInactive),
+	).Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	// Hard delete linked user if exists to prevent login
+	if person.LinkedUserID != nil {
+		userId, _ := person.LinkedUserID()
+		_, _ = database.Client.User.FindUnique(
+			db.User.ID.Equals(userId),
+		).Delete().Exec(ctx)
+	}
+
+	return nil
 }

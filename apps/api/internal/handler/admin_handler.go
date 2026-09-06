@@ -128,3 +128,48 @@ func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
 	}
 	response.Success(c, toUserResponse(*user))
 }
+
+func (h *AdminHandler) DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+
+	// Find if there is a Person linked to this user
+	person, err := database.Client.Person.FindUnique(
+		db.Person.LinkedUserID.Equals(id),
+	).Exec(c.Request.Context())
+
+	if err == nil && person != nil {
+		// Check if person has assets
+		assetCount, err := database.Client.Asset.FindMany(
+			db.Asset.CurrentCustodianID.Equals(person.ID),
+		).Exec(c.Request.Context())
+
+		if err != nil {
+			response.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if len(assetCount) > 0 {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa người dùng này vì nhân sự tương ứng đang giữ thiết bị. Vui lòng thu hồi thiết bị trước.")
+			return
+		}
+
+		// Soft delete person
+		_, _ = database.Client.Person.FindUnique(
+			db.Person.ID.Equals(person.ID),
+		).Update(
+			db.Person.Status.Set(db.RecordStatusInactive),
+		).Exec(c.Request.Context())
+	}
+
+	// Delete the user
+	_, err = database.Client.User.FindUnique(
+		db.User.ID.Equals(id),
+	).Delete().Exec(c.Request.Context())
+
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{"message": "Xóa người dùng thành công"})
+}

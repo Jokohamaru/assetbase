@@ -17,12 +17,18 @@ func NewAssetService() *AssetService {
 	return &AssetService{}
 }
 
-func (s *AssetService) ListAssets(ctx context.Context, page, limit int, search, category, status, department string) ([]db.AssetModel, error) {
+func (s *AssetService) ListAssets(ctx context.Context, page, limit int, search, category, status, department string, my bool, userID string) ([]db.AssetModel, error) {
 	offset := (page - 1) * limit
-	
-	// Base condition
-	where := []db.AssetWhereParam{
-		db.Asset.DeletedAt.IsNull(),
+
+	var where []db.AssetWhereParam
+	where = append(where, db.Asset.DeletedAt.IsNull())
+
+	if my {
+		where = append(where, db.Asset.CurrentCustodian.Where(
+			db.Person.LinkedUser.Where(
+				db.User.ID.Equals(userID),
+			),
+		))
 	}
 
 	// Dynamic filters

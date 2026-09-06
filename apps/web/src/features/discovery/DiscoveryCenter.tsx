@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../services/api-client'
 
-type Role = 'Admin' | 'IT' | 'HCNS' | 'User'
+type Role = 'ADMIN' | 'USER'
 type Lookup = { id: string; code: string; name: string; location?: Lookup }
 type DiscoveryStatus = 'PENDING' | 'MATCHED' | 'CONFLICT' | 'LINKED' | 'CREATED' | 'IGNORED'
 type AssetReference = { id: string; assetTag: string; name: string; serialNumber?: string | null; macAddress?: string | null }

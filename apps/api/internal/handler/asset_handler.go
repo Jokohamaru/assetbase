@@ -35,8 +35,11 @@ func (h *AssetHandler) ListAssets(c *gin.Context) {
 	category := c.Query("category")
 	status := c.Query("status")
 	department := c.Query("department")
+	my := c.Query("my") == "true"
+	
+	userID, _ := c.Get("userID")
 
-	data, err := h.Service.ListAssets(c.Request.Context(), page, limit, search, category, status, department)
+	data, err := h.Service.ListAssets(c.Request.Context(), page, limit, search, category, status, department, my, userID.(string))
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

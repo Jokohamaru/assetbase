@@ -225,10 +225,12 @@ func main() {
 
 				admin.GET("/asset-statuses", masterDataHandler.ListAssetStatuses)
 				admin.GET("/people", masterDataHandler.ListPeople)
+				admin.DELETE("/people/:id", masterDataHandler.DeletePerson)
 
 				admin.GET("/users", adminHandler.ListUsers)
 				admin.POST("/users", adminHandler.CreateUser)
 				admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
+				admin.DELETE("/users/:id", adminHandler.DeleteUser)
 			}
 		}
 	}

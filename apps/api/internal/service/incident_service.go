@@ -97,10 +97,13 @@ func (s *IncidentService) CreateIncident(ctx context.Context, creatorID string, 
 	return incident, nil
 }
 
-func (s *IncidentService) ListIncidents(ctx context.Context, status string) ([]db.IncidentModel, error) {
+func (s *IncidentService) ListIncidents(ctx context.Context, status string, my bool, userID string) ([]db.IncidentModel, error) {
 	var filters []db.IncidentWhereParam
 	if status != "" {
 		filters = append(filters, db.Incident.Status.Equals(db.IncidentStatus(status)))
+	}
+	if my {
+		filters = append(filters, db.Incident.Creator.Where(db.User.ID.Equals(userID)))
 	}
 	return database.Client.Incident.FindMany(filters...).
 		OrderBy(db.Incident.ReportedAt.Order(db.SortOrderDesc)).

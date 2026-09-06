@@ -14,6 +14,8 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
   const navigate = useNavigate();
   const initials = user.name.split(' ').slice(-2).map(x => x[0]).join('');
 
+  const isAdmin = user.role === 'ADMIN';
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
       {/* Mobile menu overlay */}
@@ -34,40 +36,54 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Box size={18} /> Tổng quan
-          </NavLink>
-          <NavLink to="/assets" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Box size={18} /> Sổ tài sản
-          </NavLink>
-          <NavLink to="/entitlements" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Key size={18} /> Tài sản số
-          </NavLink>
-          <NavLink to="/vendors" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Building2 size={18} /> Nhà cung cấp
-          </NavLink>
-          <NavLink to="/risks" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <ShieldAlert size={18} /> Đánh giá rủi ro
-          </NavLink>
-          <NavLink to="/master-data" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Settings size={18} /> Danh mục
-          </NavLink>
-          <NavLink to="/scanner" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <QrCode size={18} /> Barcode / QR
-          </NavLink>
-          <NavLink to="/inventory" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <ClipboardList size={18} /> Kiểm kê
-          </NavLink>
-          <NavLink to="/imports" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <FileSpreadsheet size={18} /> Nhập hàng loạt
-          </NavLink>
-          <NavLink to="/incidents" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <Activity size={18} /> Quản lý sự cố
-          </NavLink>
-          <NavLink to="/history" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-            <History size={18} /> Lịch sử / Audit
-          </NavLink>
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">          {!isAdmin && (
+            <>
+              <NavLink to="/my-assets" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Box size={18} /> Thiết bị của tôi
+              </NavLink>
+              <NavLink to="/my-incidents" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Activity size={18} /> Sự cố / Yêu cầu
+              </NavLink>
+            </>
+          )}
+
+          {isAdmin && (
+            <>
+              <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Box size={18} /> Tổng quan
+              </NavLink>
+              <NavLink to="/assets" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Box size={18} /> Sổ tài sản
+              </NavLink>
+              <NavLink to="/entitlements" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Key size={18} /> Tài sản số
+              </NavLink>
+              <NavLink to="/vendors" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Building2 size={18} /> Nhà cung cấp
+              </NavLink>
+              <NavLink to="/risks" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <ShieldAlert size={18} /> Đánh giá rủi ro
+              </NavLink>
+              <NavLink to="/master-data" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Settings size={18} /> Danh mục
+              </NavLink>
+              <NavLink to="/scanner" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <QrCode size={18} /> Barcode / QR
+              </NavLink>
+              <NavLink to="/inventory" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <ClipboardList size={18} /> Kiểm kê
+              </NavLink>
+              <NavLink to="/imports" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <FileSpreadsheet size={18} /> Nhập hàng loạt
+              </NavLink>
+              <NavLink to="/incidents" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <Activity size={18} /> Quản lý sự cố
+              </NavLink>
+              <NavLink to="/history" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <History size={18} /> Lịch sử / Audit
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">

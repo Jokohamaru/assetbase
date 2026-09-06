@@ -4,12 +4,14 @@ import { useDepartments, useLocations, useCategories, useManufacturers, useUsers
 import { UserFormModal } from './UserFormModal';
 import { CategoryFormModal } from './CategoryFormModal';
 import { DeleteCategoryModal } from './DeleteCategoryModal';
+import { DeleteUserModal } from './DeleteUserModal';
 
 type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users';
 
 export function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<Tab>('departments');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUserForDelete, setSelectedUserForDelete] = useState<any>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedCategoryForDelete, setSelectedCategoryForDelete] = useState<any>(null);
   
@@ -149,7 +151,10 @@ export function MasterDataPage() {
                             <button className="text-gray-400 hover:text-indigo-600 transition-colors">
                               <Pencil size={16} />
                             </button>
-                            <button className="text-gray-400 hover:text-red-600 transition-colors">
+                            <button 
+                              onClick={() => setSelectedUserForDelete(item)}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                            >
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -205,6 +210,12 @@ export function MasterDataPage() {
         isOpen={selectedCategoryForDelete !== null}
         onClose={() => setSelectedCategoryForDelete(null)}
         category={selectedCategoryForDelete}
+      />
+
+      <DeleteUserModal 
+        isOpen={selectedUserForDelete !== null}
+        onClose={() => setSelectedUserForDelete(null)}
+        user={selectedUserForDelete}
       />
     </div>
   );

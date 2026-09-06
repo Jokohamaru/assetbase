@@ -85,7 +85,7 @@ export interface RegionalSettings {
   firstDayOfWeek: 'monday' | 'sunday'
 }
 
-export type UserRole = 'Admin' | 'IT' | 'HCNS'
+export type UserRole = 'ADMIN' | 'USER'
 
 export interface AppUser {
   id: number | string

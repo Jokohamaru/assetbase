@@ -213,3 +213,17 @@ func (h *MasterDataHandler) ListPeople(c *gin.Context) {
 	}
 	response.Success(c, data)
 }
+
+func (h *MasterDataHandler) DeletePerson(c *gin.Context) {
+	id := c.Param("id")
+	err := h.Service.DeletePerson(c.Request.Context(), id)
+	if err != nil {
+		if err.Error() == "PERSON_HAS_ASSETS" {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa nhân viên đang giữ thiết bị. Vui lòng thu hồi thiết bị trước.")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Xóa nhân viên thành công"})
+}
