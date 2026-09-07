@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { AppUser, BrandingSettings } from '../types';
 import { useThemeStore } from '../store/useThemeStore';
+import { useAdminAssetRequests } from '../hooks/useAssetRequests';
 
 export function MainLayout({ user, branding, logout }: { user: AppUser; branding: BrandingSettings; logout: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,6 +16,10 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
   const initials = user.name.split(' ').slice(-2).map(x => x[0]).join('');
 
   const isAdmin = user.role === 'ADMIN';
+
+  // Fetch pending requests for badge if admin
+  const { data: pendingRequests } = useAdminAssetRequests(isAdmin ? 'PENDING' : undefined, 1, 1);
+  const pendingCount = pendingRequests?.total || 0;
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
@@ -42,7 +47,10 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
                 <Box size={18} /> Thiết bị của tôi
               </NavLink>
               <NavLink to="/my-incidents" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
-                <Activity size={18} /> Sự cố / Yêu cầu
+                <Activity size={18} /> Báo cáo sự cố
+              </NavLink>
+              <NavLink to="/my-requests" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <ClipboardList size={18} /> Xin cấp phát
               </NavLink>
             </>
           )}
@@ -54,6 +62,16 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
               </NavLink>
               <NavLink to="/assets" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Box size={18} /> Sổ tài sản
+              </NavLink>
+              <NavLink to="/asset-requests" className={({ isActive }) => `flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+                <div className="flex items-center gap-3">
+                  <ClipboardList size={18} /> Yêu cầu cấp phát
+                </div>
+                {pendingCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {pendingCount}
+                  </span>
+                )}
               </NavLink>
               <NavLink to="/entitlements" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Key size={18} /> Tài sản số

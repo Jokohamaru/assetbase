@@ -25,7 +25,7 @@ export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await apiClient.get('/admin/categories');
+      const response = await apiClient.get('/categories');
       return response.data.data || [];
     }
   });

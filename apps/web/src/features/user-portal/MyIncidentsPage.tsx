@@ -60,15 +60,15 @@ export function MyIncidentsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sự cố & Yêu cầu</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Lịch sử các báo cáo lỗi và yêu cầu cấp phát thiết bị của bạn</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Báo cáo sự cố</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Lịch sử các báo cáo lỗi và sự cố IT của bạn</p>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium"
           >
-            <Plus size={20} /> Tạo yêu cầu / Báo lỗi
+            <Plus size={20} /> Báo cáo sự cố mới
           </button>
         </div>
       </div>
