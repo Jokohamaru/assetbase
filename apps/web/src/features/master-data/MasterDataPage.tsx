@@ -26,7 +26,7 @@ export function MasterDataPage() {
     { id: 'locations', label: 'Kho & Vị trí', icon: MapPin, data: locations, isLoading: isLoadingLoc },
     { id: 'categories', label: 'Nhóm tài sản', icon: Tags, data: categories, isLoading: isLoadingCat },
     { id: 'manufacturers', label: 'Nhà sản xuất', icon: Box, data: manufacturers, isLoading: isLoadingMan },
-    { id: 'users', label: 'Người dùng', icon: User, data: users, isLoading: isLoadingUsers },
+    { id: 'users', label: 'Users', icon: User, data: users, isLoading: isLoadingUsers },
   ] as const;
 
   const currentTab = tabs.find(t => t.id === activeTab);
