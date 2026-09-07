@@ -52,7 +52,12 @@ func (h *LifecycleHandler) ReturnAsset(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	data, err := h.Service.ReturnAsset(c.Request.Context(), id, userID.(string), req)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "not found") || strings.Contains(errMsg, "no active assignment") || strings.Contains(errMsg, "invalid status") {
+			response.Error(c, http.StatusBadRequest, errMsg)
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, errMsg)
 		return
 	}
 	response.Success(c, data)

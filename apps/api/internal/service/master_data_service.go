@@ -175,6 +175,73 @@ func (s *MasterDataService) ListPeople(ctx context.Context) ([]db.PersonModel, e
 		Exec(ctx)
 }
 
+func (s *MasterDataService) CreatePerson(ctx context.Context, employeeCode, fullName, email, phone, jobTitle, departmentId, locationId, linkedUserId string) (*db.PersonModel, error) {
+	employeeCodeOp := db.Person.EmployeeCode.Set(employeeCode)
+	fullNameOp := db.Person.FullName.Set(fullName)
+	departmentOp := db.Person.Department.Link(db.Department.ID.Equals(departmentId))
+	var ops []db.PersonSetParam
+	
+	ops = append(ops, db.Person.Status.Set(db.RecordStatusActive))
+	
+	if email != "" {
+		ops = append(ops, db.Person.Email.Set(email))
+	}
+	if phone != "" {
+		ops = append(ops, db.Person.Phone.Set(phone))
+	}
+	if jobTitle != "" {
+		ops = append(ops, db.Person.JobTitle.Set(jobTitle))
+	}
+	if locationId != "" {
+		ops = append(ops, db.Person.Location.Link(db.Location.ID.Equals(locationId)))
+	}
+	if linkedUserId != "" {
+		ops = append(ops, db.Person.LinkedUser.Link(db.User.ID.Equals(linkedUserId)))
+	}
+
+	person, err := database.Client.Person.CreateOne(employeeCodeOp, fullNameOp, departmentOp, ops...).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return person, nil
+}
+
+func (s *MasterDataService) UpdatePerson(ctx context.Context, id, employeeCode, fullName, email, phone, jobTitle, departmentId, locationId, linkedUserId string) (*db.PersonModel, error) {
+	var ops []db.PersonSetParam
+	if employeeCode != "" {
+		ops = append(ops, db.Person.EmployeeCode.Set(employeeCode))
+	}
+	if fullName != "" {
+		ops = append(ops, db.Person.FullName.Set(fullName))
+	}
+	if departmentId != "" {
+		ops = append(ops, db.Person.Department.Link(db.Department.ID.Equals(departmentId)))
+	}
+	if email != "" {
+		ops = append(ops, db.Person.Email.Set(email))
+	}
+	if phone != "" {
+		ops = append(ops, db.Person.Phone.Set(phone))
+	}
+	if jobTitle != "" {
+		ops = append(ops, db.Person.JobTitle.Set(jobTitle))
+	}
+	if locationId != "" {
+		ops = append(ops, db.Person.Location.Link(db.Location.ID.Equals(locationId)))
+	}
+	if linkedUserId != "" {
+		ops = append(ops, db.Person.LinkedUser.Link(db.User.ID.Equals(linkedUserId)))
+	}
+
+	person, err := database.Client.Person.FindUnique(
+		db.Person.ID.Equals(id),
+	).Update(ops...).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return person, nil
+}
+
 func (s *MasterDataService) DeletePerson(ctx context.Context, id string) error {
 	// Check if the person is holding any assets
 	assetCount, err := database.Client.Asset.FindMany(
@@ -210,8 +277,8 @@ func (s *MasterDataService) DeletePerson(ctx context.Context, id string) error {
 	}
 
 	// Hard delete linked user if exists to prevent login
-	if person.LinkedUserID != nil {
-		userId, _ := person.LinkedUserID()
+	userId, hasUser := person.LinkedUserID()
+	if hasUser {
 		_, _ = database.Client.User.FindUnique(
 			db.User.ID.Equals(userId),
 		).Delete().Exec(ctx)

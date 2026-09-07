@@ -140,11 +140,15 @@ func (s *IncidentService) UpdateStatus(ctx context.Context, id string, actorID s
 	}
 
 	// Update SLA timestamp based on status transition
-	if newStatus == db.IncidentStatusInProgress && incident.ResponseStartedAt == nil {
+	_, hasResponse := incident.ResponseStartedAt()
+	_, hasResolved := incident.ResolvedAt()
+	_, hasClosed := incident.ClosedAt()
+
+	if newStatus == db.IncidentStatusInProgress && !hasResponse {
 		updateParams = append(updateParams, db.Incident.ResponseStartedAt.Set(now))
-	} else if newStatus == db.IncidentStatusResolved && incident.ResolvedAt == nil {
+	} else if newStatus == db.IncidentStatusResolved && !hasResolved {
 		updateParams = append(updateParams, db.Incident.ResolvedAt.Set(now))
-	} else if newStatus == db.IncidentStatusClosed && incident.ClosedAt == nil {
+	} else if newStatus == db.IncidentStatusClosed && !hasClosed {
 		updateParams = append(updateParams, db.Incident.ClosedAt.Set(now))
 	}
 

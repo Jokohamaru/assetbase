@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2, User } from 'lucide-react';
-import { useDepartments, useLocations, useCategories, useManufacturers, useUsers } from '../../hooks/useMasterData';
+import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2, User, Users } from 'lucide-react';
+import { useDepartments, useLocations, useCategories, useManufacturers, useUsers, usePeople } from '../../hooks/useMasterData';
 import { UserFormModal } from './UserFormModal';
 import { CategoryFormModal } from './CategoryFormModal';
 import { DeleteCategoryModal } from './DeleteCategoryModal';
 import { DeleteUserModal } from './DeleteUserModal';
+import { PersonFormModal } from './PersonFormModal';
+import { DeletePersonModal } from './DeletePersonModal';
 
-type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users';
+type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users' | 'people';
 
 export function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<Tab>('departments');
@@ -14,19 +16,24 @@ export function MasterDataPage() {
   const [selectedUserForDelete, setSelectedUserForDelete] = useState<any>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedCategoryForDelete, setSelectedCategoryForDelete] = useState<any>(null);
+  const [isPersonModalOpen, setIsPersonModalOpen] = useState(false);
+  const [selectedPersonForDelete, setSelectedPersonForDelete] = useState<any>(null);
+  const [selectedPersonForEdit, setSelectedPersonForEdit] = useState<any>(null);
   
   const { data: departments = [], isLoading: isLoadingDept } = useDepartments();
   const { data: locations = [], isLoading: isLoadingLoc } = useLocations();
   const { data: categories = [], isLoading: isLoadingCat } = useCategories();
   const { data: manufacturers = [], isLoading: isLoadingMan } = useManufacturers();
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
+  const { data: people = [], isLoading: isLoadingPeople } = usePeople();
 
   const tabs = [
     { id: 'departments', label: 'Phòng ban', icon: Building2, data: departments, isLoading: isLoadingDept },
     { id: 'locations', label: 'Kho & Vị trí', icon: MapPin, data: locations, isLoading: isLoadingLoc },
     { id: 'categories', label: 'Nhóm tài sản', icon: Tags, data: categories, isLoading: isLoadingCat },
     { id: 'manufacturers', label: 'Nhà sản xuất', icon: Box, data: manufacturers, isLoading: isLoadingMan },
-    { id: 'users', label: 'Users', icon: User, data: users, isLoading: isLoadingUsers },
+    { id: 'users', label: 'Tài khoản', icon: User, data: users, isLoading: isLoadingUsers },
+    { id: 'people', label: 'Nhân sự', icon: Users, data: people, isLoading: isLoadingPeople },
   ] as const;
 
   const currentTab = tabs.find(t => t.id === activeTab);
@@ -77,6 +84,9 @@ export function MasterDataPage() {
                   setIsUserModalOpen(true);
                 } else if (activeTab === 'categories') {
                   setIsCategoryModalOpen(true);
+                } else if (activeTab === 'people') {
+                  setSelectedPersonForEdit(null);
+                  setIsPersonModalOpen(true);
                 }
               }}
               className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
@@ -94,6 +104,15 @@ export function MasterDataPage() {
                     <th className="px-6 py-3 font-medium">Email</th>
                     <th className="px-6 py-3 font-medium">Vai trò</th>
                     <th className="px-6 py-3 font-medium">Trạng thái</th>
+                    <th className="px-6 py-3 font-medium w-24">Thao tác</th>
+                  </tr>
+                ) : activeTab === 'people' ? (
+                  <tr>
+                    <th className="px-6 py-3 font-medium">Mã NV</th>
+                    <th className="px-6 py-3 font-medium">Họ tên</th>
+                    <th className="px-6 py-3 font-medium">Phòng ban</th>
+                    <th className="px-6 py-3 font-medium">Chức danh</th>
+                    <th className="px-6 py-3 font-medium">Tài khoản liên kết</th>
                     <th className="px-6 py-3 font-medium w-24">Thao tác</th>
                   </tr>
                 ) : (
@@ -160,6 +179,44 @@ export function MasterDataPage() {
                           </div>
                         </td>
                       </tr>
+                    ) : activeTab === 'people' ? (
+                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-900 dark:text-gray-100 font-medium">{item.employeeCode}</td>
+                        <td className="px-6 py-4 text-gray-900 dark:text-gray-100">
+                          <div className="font-medium">{item.fullName}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{item.email || '—'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.department?.name || '—'}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{item.jobTitle || '—'}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                          {item.linkedUser ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              @{item.linkedUser.username}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Chưa liên kết</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => {
+                                setSelectedPersonForEdit(item);
+                                setIsPersonModalOpen(true);
+                              }}
+                              className="text-gray-400 hover:text-indigo-600 transition-colors"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button 
+                              onClick={() => setSelectedPersonForDelete(item)}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
                       <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4 text-gray-900 dark:text-gray-100 font-medium">{item.code || item.id}</td>
@@ -216,6 +273,21 @@ export function MasterDataPage() {
         isOpen={selectedUserForDelete !== null}
         onClose={() => setSelectedUserForDelete(null)}
         user={selectedUserForDelete}
+      />
+
+      <PersonFormModal
+        isOpen={isPersonModalOpen}
+        onClose={() => {
+          setIsPersonModalOpen(false);
+          setSelectedPersonForEdit(null);
+        }}
+        person={selectedPersonForEdit}
+      />
+
+      <DeletePersonModal
+        isOpen={selectedPersonForDelete !== null}
+        onClose={() => setSelectedPersonForDelete(null)}
+        person={selectedPersonForDelete}
       />
     </div>
   );

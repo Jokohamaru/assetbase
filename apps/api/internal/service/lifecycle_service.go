@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Jokohamaru/assetbase/internal/database"
@@ -37,8 +38,9 @@ func (s *LifecycleService) AssignAsset(ctx context.Context, assetID string, acto
 	}
 
 	// Create Assignment
+	assignmentNo := fmt.Sprintf("ASN-%s-%d", asset.AssetTag, time.Now().UnixMilli())
 	assignment, err := database.Client.AssetAssignment.CreateOne(
-		db.AssetAssignment.AssignmentNo.Set("ASN-"+asset.AssetTag), // Should generate a unique one in real app
+		db.AssetAssignment.AssignmentNo.Set(assignmentNo),
 		db.AssetAssignment.Type.Set(assignType),
 		db.AssetAssignment.ConditionOut.Set(req.ConditionOut),
 		db.AssetAssignment.Asset.Link(db.Asset.ID.Equals(assetID)),
@@ -131,8 +133,9 @@ func (s *LifecycleService) ReturnAsset(ctx context.Context, assetID string, acto
 		optionalParams = append(optionalParams, db.AssetReturn.Note.Set(*req.Note))
 	}
 
+	returnNo := fmt.Sprintf("RTN-%s-%d", asset.AssetTag, time.Now().UnixMilli())
 	returnRecord, err := database.Client.AssetReturn.CreateOne(
-		db.AssetReturn.ReturnNo.Set("RTN-" + asset.AssetTag),
+		db.AssetReturn.ReturnNo.Set(returnNo),
 		db.AssetReturn.ConditionIn.Set(req.ConditionIn),
 		db.AssetReturn.Outcome.Set(outcome),
 		db.AssetReturn.Assignment.Link(db.AssetAssignment.ID.Equals(assignment.ID)),

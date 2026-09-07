@@ -225,6 +225,8 @@ func main() {
 
 				admin.GET("/asset-statuses", masterDataHandler.ListAssetStatuses)
 				admin.GET("/people", masterDataHandler.ListPeople)
+				admin.POST("/people", masterDataHandler.CreatePerson)
+				admin.PUT("/people/:id", masterDataHandler.UpdatePerson)
 				admin.DELETE("/people/:id", masterDataHandler.DeletePerson)
 
 				admin.GET("/users", adminHandler.ListUsers)

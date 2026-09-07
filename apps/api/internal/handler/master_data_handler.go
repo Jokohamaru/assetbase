@@ -214,6 +214,55 @@ func (h *MasterDataHandler) ListPeople(c *gin.Context) {
 	response.Success(c, data)
 }
 
+func (h *MasterDataHandler) CreatePerson(c *gin.Context) {
+	var req struct {
+		EmployeeCode string `json:"employeeCode" binding:"required"`
+		FullName     string `json:"fullName" binding:"required"`
+		Email        string `json:"email"`
+		Phone        string `json:"phone"`
+		JobTitle     string `json:"jobTitle"`
+		DepartmentId string `json:"departmentId" binding:"required"`
+		LocationId   string `json:"locationId"`
+		LinkedUserId string `json:"linkedUserId"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	res, err := h.Service.CreatePerson(c.Request.Context(), req.EmployeeCode, req.FullName, req.Email, req.Phone, req.JobTitle, req.DepartmentId, req.LocationId, req.LinkedUserId)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
+func (h *MasterDataHandler) UpdatePerson(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		EmployeeCode string `json:"employeeCode"`
+		FullName     string `json:"fullName"`
+		Email        string `json:"email"`
+		Phone        string `json:"phone"`
+		JobTitle     string `json:"jobTitle"`
+		DepartmentId string `json:"departmentId"`
+		LocationId   string `json:"locationId"`
+		LinkedUserId string `json:"linkedUserId"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	res, err := h.Service.UpdatePerson(c.Request.Context(), id, req.EmployeeCode, req.FullName, req.Email, req.Phone, req.JobTitle, req.DepartmentId, req.LocationId, req.LinkedUserId)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
 func (h *MasterDataHandler) DeletePerson(c *gin.Context) {
 	id := c.Param("id")
 	err := h.Service.DeletePerson(c.Request.Context(), id)
