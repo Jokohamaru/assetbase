@@ -64,4 +64,4 @@ apps/api/cmd/update_status
 
 
 # test files
-.js
+*.js
