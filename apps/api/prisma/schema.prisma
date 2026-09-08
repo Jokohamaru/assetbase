@@ -70,12 +70,9 @@ enum IncidentCategory {
   OTHER
 }
 
-enum AssetRequestStatus {
-  PENDING    // Chờ duyệt
-  APPROVED   // Đã duyệt, chưa cấp phát
-  REJECTED   // Từ chối
-  FULFILLED  // Đã cấp phát thiết bị
-  CANCELLED  // User tự hủy
+enum TicketType {
+  INCIDENT
+  SERVICE_REQUEST
 }
 
 enum IncidentStatus {
@@ -314,9 +311,6 @@ model User {
   riskReviews                  RiskReview[]         @relation("RiskReviewer")
   authSessions                 AuthSession[]
   person                       Person?
-  assetRequests                AssetRequest[]       @relation("AssetRequests")
-  assetRequestApprovals        AssetRequest[]       @relation("AssetRequestApprovals")
-  assetRequestFulfillments     AssetRequest[]       @relation("AssetRequestFulfillments")
   createdAt                    DateTime             @default(now())
   updatedAt                    DateTime             @updatedAt
 
@@ -423,7 +417,6 @@ model AssetCategory {
   models            ProductModel[]
   assets            Asset[]
   inventorySessions InventorySession[]
-  assetRequests     AssetRequest[]     @relation("RequestedAssetCategory")
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
@@ -553,7 +546,8 @@ model AssetAssignment {
   location           Location              @relation(fields: [locationId], references: [id], onDelete: Restrict)
   actor              User                  @relation("AssignmentActor", fields: [assignedBy], references: [id], onDelete: Restrict)
   returnRecord       AssetReturn?
-  requestFulfillment AssetRequest?         @relation("RequestFulfillment")
+  incidentId         String?               @unique @db.Uuid
+  incident           Incident?             @relation(fields: [incidentId], references: [id], onDelete: SetNull)
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 
@@ -748,6 +742,8 @@ model Incident {
   id                   String             @id @default(uuid()) @db.Uuid
   incidentNo           String             @unique @db.VarChar(50)
   title                String             @db.VarChar(250)
+  ticketType           TicketType         @default(INCIDENT)
+  requestDetails       Json?
   category             IncidentCategory
   status               IncidentStatus     @default(NEW)
   priority             IncidentPriority
@@ -789,6 +785,7 @@ model Incident {
   asset                Asset?             @relation(fields: [assetId], references: [id], onDelete: Restrict)
   activities           IncidentActivity[]
   assignments          IncidentAssignment[]
+  assetAssignment      AssetAssignment?
   riskLinks            RiskIncident[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
@@ -1161,43 +1158,6 @@ model RiskReview {
   @@map("risk_reviews")
 }
 
-model AssetRequest {
-  id                String             @id @default(uuid()) @db.Uuid
-  requestNo         String             @unique @db.VarChar(50)
-
-  // Người yêu cầu
-  requestedBy       String             @db.Uuid
-  requester         User               @relation("AssetRequests", fields: [requestedBy], references: [id], onDelete: Restrict)
-
-  // Nội dung yêu cầu
-  assetCategoryId   String             @db.Uuid
-  assetCategory     AssetCategory      @relation("RequestedAssetCategory", fields: [assetCategoryId], references: [id], onDelete: Restrict)
-  purpose           String             @db.VarChar(255)
-  description       String
-
-  // Trạng thái
-  status            AssetRequestStatus @default(PENDING)
-
-  // Duyệt / Từ chối
-  approvedBy        String?            @db.Uuid
-  approver          User?              @relation("AssetRequestApprovals", fields: [approvedBy], references: [id], onDelete: SetNull)
-  approvedAt        DateTime?
-  rejectionReason   String?
-
-  // Cấp phát
-  assignmentId      String?            @unique @db.Uuid
-  assignment        AssetAssignment?   @relation("RequestFulfillment", fields: [assignmentId], references: [id], onDelete: SetNull)
-  fulfilledBy       String?            @db.Uuid
-  fulfiller         User?              @relation("AssetRequestFulfillments", fields: [fulfilledBy], references: [id], onDelete: SetNull)
-  fulfilledAt       DateTime?
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([requestedBy, status])
-  @@index([status, createdAt])
-  @@map("asset_requests")
-}
 
 model ApplicationSetting {
   key       String   @id @db.VarChar(50)

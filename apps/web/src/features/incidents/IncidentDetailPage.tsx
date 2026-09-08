@@ -8,12 +8,14 @@ import {
 } from 'lucide-react';
 import { apiClient as api } from '../../lib/api-client';
 import { Incident } from '../../types';
+import { FulfillRequestModal } from '../assets/components/FulfillRequestModal';
 
 export function IncidentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isFulfillModalOpen, setIsFulfillModalOpen] = useState(false);
   const [statusForm, setStatusForm] = useState({
     status: '',
     note: '',
@@ -119,6 +121,15 @@ export function IncidentDetailPage() {
         </div>
         
         <div className="flex gap-2">
+          {incident.ticketType === 'SERVICE_REQUEST' && incident.status !== 'CLOSED' && incident.status !== 'RESOLVED' && (
+            <button 
+              onClick={() => setIsFulfillModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2"
+            >
+              Cấp phát tài sản
+            </button>
+          )}
+
           {!isUpdatingStatus && incident.status !== 'CLOSED' && (
             <button 
               onClick={() => {
@@ -318,6 +329,14 @@ export function IncidentDetailPage() {
           </div>
         </div>
       </div>
+      
+      {isFulfillModalOpen && (
+        <FulfillRequestModal 
+          isOpen={isFulfillModalOpen} 
+          onClose={() => setIsFulfillModalOpen(false)} 
+          request={incident} 
+        />
+      )}
     </div>
   );
 }

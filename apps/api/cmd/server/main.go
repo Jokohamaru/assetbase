@@ -94,9 +94,6 @@ func main() {
 	dashboardService := service.NewDashboardService()
 	dashboardHandler := handler.NewDashboardHandler(dashboardService)
 
-	assetRequestService := service.NewAssetRequestService()
-	assetRequestHandler := handler.NewAssetRequestHandler(assetRequestService)
-
 	uploadHandler := handler.NewUploadHandler()
 
 	v1 := r.Group("/api/v1")
@@ -115,15 +112,6 @@ func main() {
 
 			// Upload route
 			protected.POST("/upload", uploadHandler.UploadImage)
-
-			// Asset Requests routes (User)
-			assetRequests := protected.Group("/asset-requests")
-			{
-				assetRequests.POST("", assetRequestHandler.CreateAssetRequest)
-				assetRequests.GET("/my", assetRequestHandler.ListMyAssetRequests)
-				assetRequests.GET("/:id", assetRequestHandler.GetAssetRequest)
-				assetRequests.PUT("/:id/cancel", assetRequestHandler.CancelAssetRequest)
-			}
 
 			// Dashboard routes
 			dashboard := protected.Group("/dashboard")
@@ -174,6 +162,7 @@ func main() {
 				incidents.GET("/:id", incidentHandler.GetIncident)
 				incidents.PUT("/:id/status", incidentHandler.UpdateStatus)
 				incidents.PUT("/:id/assign", incidentHandler.AssignIncident)
+				incidents.POST("/:id/fulfill", incidentHandler.FulfillIncident)
 			}
 
 			// Digital Entitlements routes
@@ -248,11 +237,6 @@ func main() {
 				admin.POST("/users", adminHandler.CreateUser)
 				admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
 				admin.DELETE("/users/:id", adminHandler.DeleteUser)
-
-				admin.GET("/asset-requests", assetRequestHandler.ListAllAssetRequests)
-				admin.PUT("/asset-requests/:id/approve", assetRequestHandler.ApproveAssetRequest)
-				admin.PUT("/asset-requests/:id/reject", assetRequestHandler.RejectAssetRequest)
-				admin.POST("/asset-requests/:id/fulfill", assetRequestHandler.FulfillAssetRequest)
 			}
 		}
 	}

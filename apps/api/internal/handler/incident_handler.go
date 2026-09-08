@@ -24,7 +24,7 @@ func (h *IncidentHandler) CreateIncident(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("user_id")
+	userID := c.GetString("userID")
 
 	incident, err := h.Service.CreateIncident(c.Request.Context(), userID, req)
 	if err != nil {
@@ -37,10 +37,11 @@ func (h *IncidentHandler) CreateIncident(c *gin.Context) {
 
 func (h *IncidentHandler) ListIncidents(c *gin.Context) {
 	status := c.Query("status")
+	ticketType := c.Query("ticketType")
 	my := c.Query("my") == "true"
-	userID := c.GetString("user_id")
+	userID := c.GetString("userID")
 	
-	incidents, err := h.Service.ListIncidents(c.Request.Context(), status, my, userID)
+	incidents, err := h.Service.ListIncidents(c.Request.Context(), status, ticketType, my, userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -68,7 +69,7 @@ func (h *IncidentHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("user_id")
+	userID := c.GetString("userID")
 
 	incident, err := h.Service.UpdateStatus(c.Request.Context(), id, userID, req)
 	if err != nil {
@@ -87,9 +88,28 @@ func (h *IncidentHandler) AssignIncident(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("user_id")
+	userID := c.GetString("userID")
 
 	incident, err := h.Service.AssignIncident(c.Request.Context(), id, userID, req)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, incident)
+}
+
+func (h *IncidentHandler) FulfillIncident(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.FulfillIncidentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userID := c.GetString("userID")
+
+	incident, err := h.Service.FulfillIncident(c.Request.Context(), id, userID, req)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

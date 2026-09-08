@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { useFulfillAssetRequest, type AssetRequest } from '../../../hooks/useAssetRequests';
+import { useFulfillAssetRequest } from '../../../hooks/useAssetRequests';
 import { apiClient } from '../../../lib/api-client';
-import type { Asset } from '../../../types';
+import type { Asset, Incident } from '../../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  request: AssetRequest | null;
+  request: Incident | null;
 }
 
 export function FulfillRequestModal({ isOpen, onClose, request }: Props) {
@@ -18,14 +18,25 @@ export function FulfillRequestModal({ isOpen, onClose, request }: Props) {
   const [loadingAssets, setLoadingAssets] = useState(false);
 
   useEffect(() => {
-    if (isOpen && request) {
-      // Fetch READY assets of the requested category
+    if (isOpen && request && request.ticketType === 'SERVICE_REQUEST') {
+      let details: any = {};
+      try {
+        if (typeof request.requestDetails === 'string') {
+          details = JSON.parse(request.requestDetails);
+        } else if (request.requestDetails) {
+          details = request.requestDetails;
+        }
+      } catch(e) {}
+      
       const fetchAssets = async () => {
         setLoadingAssets(true);
         try {
-          const res = await apiClient.get('/assets', {
-            params: { categoryId: request.assetCategoryId, status: 'READY', limit: 100 }
-          });
+          // fetch by category if defined
+          const params: any = { status: 'READY', limit: 100 };
+          if (details.assetCategoryId) {
+            params.categoryId = details.assetCategoryId;
+          }
+          const res = await apiClient.get('/assets', { params });
           setAssets(res.data.data.items || []);
         } catch (err) {
           console.error(err);
@@ -46,10 +57,22 @@ export function FulfillRequestModal({ isOpen, onClose, request }: Props) {
     if (!assetId || !conditionOut) return;
 
     mutation.mutate({ id: request.id, data: { assetId, conditionOut } }, {
-      onSuccess: () => onClose(),
+      onSuccess: () => {
+        onClose();
+        alert('Cấp phát thành công!');
+      },
       onError: (err: any) => alert(err.response?.data?.error || 'Có lỗi xảy ra')
     });
   };
+
+  let details: any = {};
+  try {
+    if (typeof request.requestDetails === 'string') {
+      details = JSON.parse(request.requestDetails);
+    } else if (request.requestDetails) {
+      details = request.requestDetails;
+    }
+  } catch(e) {}
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -61,9 +84,10 @@ export function FulfillRequestModal({ isOpen, onClose, request }: Props) {
         
         <form onSubmit={handleFulfill} className="p-4 space-y-4">
           <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
-            <p><span className="font-medium">Người yêu cầu:</span> {request.requestedByName}</p>
-            <p><span className="font-medium">Loại thiết bị:</span> {request.assetCategory}</p>
-            <p><span className="font-medium">Mục đích:</span> {request.purpose}</p>
+            <p><span className="font-medium">Mã yêu cầu:</span> {request.incidentNo}</p>
+            <p><span className="font-medium">Người yêu cầu:</span> {request.reporterName}</p>
+            <p><span className="font-medium">Tiêu đề:</span> {request.title}</p>
+            {details.purpose && <p><span className="font-medium">Mục đích:</span> {details.purpose}</p>}
           </div>
 
           <div>

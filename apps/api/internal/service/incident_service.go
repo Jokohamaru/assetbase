@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -64,6 +65,17 @@ func (s *IncidentService) CreateIncident(ctx context.Context, creatorID string, 
 	if req.IsSecurityIncident {
 		optionalParams = append(optionalParams, db.Incident.IsSecurityIncident.Set(true))
 	}
+	if req.TicketType != "" {
+		optionalParams = append(optionalParams, db.Incident.TicketType.Set(db.TicketType(req.TicketType)))
+	} else {
+		optionalParams = append(optionalParams, db.Incident.TicketType.Set(db.TicketTypeIncident))
+	}
+	if req.RequestDetails != nil {
+		b, err := json.Marshal(req.RequestDetails)
+		if err == nil {
+			optionalParams = append(optionalParams, db.Incident.RequestDetails.Set(b))
+		}
+	}
 
 	incident, err := database.Client.Incident.CreateOne(
 		db.Incident.IncidentNo.Set(incidentNo),
@@ -97,10 +109,13 @@ func (s *IncidentService) CreateIncident(ctx context.Context, creatorID string, 
 	return incident, nil
 }
 
-func (s *IncidentService) ListIncidents(ctx context.Context, status string, my bool, userID string) ([]db.IncidentModel, error) {
+func (s *IncidentService) ListIncidents(ctx context.Context, status string, ticketType string, my bool, userID string) ([]db.IncidentModel, error) {
 	var filters []db.IncidentWhereParam
 	if status != "" {
 		filters = append(filters, db.Incident.Status.Equals(db.IncidentStatus(status)))
+	}
+	if ticketType != "" {
+		filters = append(filters, db.Incident.TicketType.Equals(db.TicketType(ticketType)))
 	}
 	if my {
 		filters = append(filters, db.Incident.Creator.Where(db.User.ID.Equals(userID)))
@@ -208,4 +223,119 @@ func (s *IncidentService) AssignIncident(ctx context.Context, id string, actorID
 	).Exec(ctx)
 
 	return updated, nil
+}
+
+func (s *IncidentService) FulfillIncident(ctx context.Context, incidentId string, adminID string, payload dto.FulfillIncidentRequest) (*db.IncidentModel, error) {
+	// 1. Validate request
+	incident, err := database.Client.Incident.FindUnique(
+		db.Incident.ID.Equals(incidentId),
+	).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("incident not found")
+	}
+
+	if incident.TicketType != db.TicketTypeServiceRequest {
+		return nil, fmt.Errorf("only SERVICE_REQUEST can be fulfilled")
+	}
+	
+	// Assuming an APPROVED status exists or we just check if it's not closed
+	if incident.Status == db.IncidentStatusClosed || incident.Status == db.IncidentStatusResolved || incident.Status == db.IncidentStatusCancelled {
+		return nil, fmt.Errorf("cannot fulfill a closed or resolved request")
+	}
+
+	// 2. Find requester's Person record
+	person, err := database.Client.Person.FindFirst(
+		db.Person.LinkedUserID.Equals(incident.CreatedByID),
+	).Exec(ctx)
+	if err != nil || person == nil {
+		return nil, fmt.Errorf("người yêu cầu chưa có hồ sơ nhân sự (Person record) trong hệ thống")
+	}
+
+	// 3. Find Asset
+	asset, err := database.Client.Asset.FindUnique(
+		db.Asset.ID.Equals(payload.AssetId),
+	).With(
+		db.Asset.Status.Fetch(),
+	).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("asset not found")
+	}
+
+	if asset.Status().Code != "READY" {
+		return nil, fmt.Errorf("asset must be in READY status to be assigned")
+	}
+
+	// 4. Resolve location
+	locationId, ok := person.LocationID()
+	if !ok {
+		loc, ok2 := asset.LocationID()
+		if !ok2 {
+			return nil, fmt.Errorf("cannot determine location for assignment")
+		}
+		locationId = loc
+	}
+
+	// 5. Create AssetAssignment
+	assignmentNo := fmt.Sprintf("ASN-%s-%d", asset.AssetTag, time.Now().UnixMilli())
+	_, err = database.Client.AssetAssignment.CreateOne(
+		db.AssetAssignment.AssignmentNo.Set(assignmentNo),
+		db.AssetAssignment.Type.Set(db.AssetAssignmentTypeAssignment),
+		db.AssetAssignment.ConditionOut.Set(payload.ConditionOut),
+		db.AssetAssignment.Asset.Link(db.Asset.ID.Equals(payload.AssetId)),
+		db.AssetAssignment.AssignedTo.Link(db.Person.ID.Equals(person.ID)),
+		db.AssetAssignment.Department.Link(db.Department.ID.Equals(person.DepartmentID)),
+		db.AssetAssignment.Location.Link(db.Location.ID.Equals(locationId)),
+		db.AssetAssignment.Actor.Link(db.User.ID.Equals(adminID)),
+		db.AssetAssignment.Incident.Link(db.Incident.ID.Equals(incident.ID)),
+	).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create assignment: %v", err)
+	}
+
+	// 6. Create AssetHistory (CRITICAL FIX)
+	_, _ = database.Client.AssetHistory.CreateOne(
+		db.AssetHistory.Action.Set(db.AssetHistoryActionAssigned),
+		db.AssetHistory.Description.Set("Asset assigned to fulfill Service Request "+incident.IncidentNo),
+		db.AssetHistory.Asset.Link(db.Asset.ID.Equals(payload.AssetId)),
+		db.AssetHistory.Actor.Link(db.User.ID.Equals(adminID)),
+	).Exec(ctx)
+
+	// 7. Update Asset Status & Custodian
+	inUseStatus, err := database.Client.AssetStatus.FindFirst(
+		db.AssetStatus.Code.Equals("IN_USE"),
+	).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("system error: IN_USE status not found")
+	}
+
+	_, err = database.Client.Asset.FindUnique(
+		db.Asset.ID.Equals(payload.AssetId),
+	).Update(
+		db.Asset.Status.Link(db.AssetStatus.ID.Equals(inUseStatus.ID)),
+		db.Asset.CurrentCustodian.Link(db.Person.ID.Equals(person.ID)),
+	).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update asset: %v", err)
+	}
+
+	now := time.Now()
+	// 8. Update Incident
+	updatedReq, err := database.Client.Incident.FindUnique(
+		db.Incident.ID.Equals(incidentId),
+	).Update(
+		db.Incident.Status.Set(db.IncidentStatusResolved),
+		db.Incident.ResolvedAt.Set(now),
+	).Exec(ctx)
+	
+	// 9. Create IncidentActivity
+	_, _ = database.Client.IncidentActivity.CreateOne(
+		db.IncidentActivity.Type.Set("FULFILLED"),
+		db.IncidentActivity.Note.Set(fmt.Sprintf("Đã cấp phát tài sản %s (Tag: %s) để giải quyết yêu cầu. Ghi chú: %s", asset.Name, asset.AssetTag, payload.Note)),
+		db.IncidentActivity.Incident.Link(db.Incident.ID.Equals(incident.ID)),
+		db.IncidentActivity.Actor.Link(db.User.ID.Equals(adminID)),
+		db.IncidentActivity.FromStatus.Set(incident.Status),
+		db.IncidentActivity.ToStatus.Set(db.IncidentStatusResolved),
+	).Exec(ctx)
+
+	return updatedReq, err
 }

@@ -7,15 +7,21 @@ import {
 } from 'lucide-react';
 import { apiClient as api } from '../../lib/api-client';
 import { Incident } from '../../types';
+import { CreateIncidentModal } from '../user-portal/components/CreateIncidentModal';
 
 export function IncidentListPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('');
+  const [ticketTypeFilter, setTicketTypeFilter] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data: incidentsRes, isLoading } = useQuery({
-    queryKey: ['incidents', statusFilter],
+    queryKey: ['incidents', statusFilter, ticketTypeFilter],
     queryFn: async () => {
-      const url = statusFilter ? `/incidents?status=${statusFilter}` : '/incidents';
+      const params = new URLSearchParams();
+      if (statusFilter) params.append('status', statusFilter);
+      if (ticketTypeFilter) params.append('ticketType', ticketTypeFilter);
+      const url = `/incidents?${params.toString()}`;
       const res = await api.get<{ data: Incident[] }>(url);
       return res.data;
     },
@@ -44,6 +50,13 @@ export function IncidentListPage() {
     }
   };
 
+  const getTypeBadge = (type?: string) => {
+    if (type === 'SERVICE_REQUEST') {
+      return <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-medium">Yêu cầu DV</span>;
+    }
+    return <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded text-xs font-medium">Sự cố</span>;
+  };
+
   const checkSLAStatus = (incident: Incident) => {
     if (incident.status === 'RESOLVED' || incident.status === 'CLOSED') {
       return { 
@@ -59,99 +72,102 @@ export function IncidentListPage() {
     if (now > resolutionDue) {
       return { 
         breached: true, 
-        message: 'Vi phạm SLA', 
-        color: 'text-red-600 bg-red-50 border-red-200 animate-pulse' 
+        message: 'Trễ SLA (Resolution)', 
+        color: 'text-red-600 bg-red-50 border-red-200' 
       };
     }
     
-    const timeDiff = resolutionDue.getTime() - now.getTime();
-    const hoursLeft = Math.floor(timeDiff / (1000 * 60 * 60));
-    
-    if (hoursLeft < 2) {
+    const responseDue = new Date(incident.slaResponseDueAt);
+    if (!incident.responseStartedAt && now > responseDue) {
       return { 
-        breached: false, 
-        message: `Còn < ${hoursLeft + 1} giờ`, 
-        color: 'text-orange-600 bg-orange-50 border-orange-200' 
+        breached: true, 
+        message: 'Trễ SLA (Response)', 
+        color: 'text-red-600 bg-red-50 border-red-200' 
       };
     }
-    
+
     return { 
       breached: false, 
-      message: 'Trong SLA', 
-      color: 'text-gray-600 bg-gray-50 border-gray-200' 
+      message: 'Trong hạn SLA', 
+      color: 'text-blue-600 bg-blue-50 border-blue-200' 
     };
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-            <Activity className="text-primary" /> Quản lý Sự cố (Incidents)
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Theo dõi, phân công và xử lý các sự cố IT kèm SLA
+          <h1 className="text-2xl font-bold text-gray-900">Quản lý Sự cố & Yêu cầu</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Theo dõi và xử lý các sự cố IT và yêu cầu dịch vụ
           </p>
         </div>
-        <button
-          onClick={() => alert("Tính năng thêm sự cố chưa khả dụng")}
-          className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm font-medium"
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center"
         >
-          <Plus size={20} />
-          Báo cáo sự cố
+          <Plus className="w-4 h-4 mr-2" />
+          Tạo Ticket
         </button>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex flex-col sm:flex-row gap-4 items-center justify-between bg-gray-50/50 dark:bg-slate-800/20">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Tìm mã sự cố..." 
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-          
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <Filter size={16} /> Lọc:
-            </div>
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              <option value="">Tất cả trạng thái</option>
-              <option value="NEW">Mới (New)</option>
-              <option value="IN_PROGRESS">Đang xử lý (In Progress)</option>
-              <option value="RESOLVED">Đã khắc phục (Resolved)</option>
-              <option value="CLOSED">Đã đóng (Closed)</option>
-            </select>
-          </div>
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4">
+        <div className="relative flex-1">
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input 
+            type="text"
+            placeholder="Tìm kiếm theo mã số, tiêu đề..."
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
+        <div className="flex items-center space-x-2">
+          <Filter className="w-5 h-5 text-gray-400" />
+          <select 
+            value={ticketTypeFilter}
+            onChange={(e) => setTicketTypeFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Tất cả loại</option>
+            <option value="INCIDENT">Sự cố</option>
+            <option value="SERVICE_REQUEST">Yêu cầu DV</option>
+          </select>
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="NEW">Mới (New)</option>
+            <option value="IN_PROGRESS">Đang xử lý</option>
+            <option value="ON_HOLD">Tạm dừng</option>
+            <option value="RESOLVED">Đã khắc phục</option>
+            <option value="CLOSED">Đã đóng</option>
+          </select>
+        </div>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-slate-700">
-              <tr>
-                <th className="p-4 font-medium">Mã sự cố</th>
-                <th className="p-4 font-medium">Tiêu đề</th>
-                <th className="p-4 font-medium">Mức độ</th>
-                <th className="p-4 font-medium">Trạng thái</th>
-                <th className="p-4 font-medium">Người báo cáo</th>
-                <th className="p-4 font-medium">Hạn SLA</th>
-                <th className="p-4 font-medium w-10"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-800/60">
-              {isLoading ? (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+              <th className="p-4 font-medium text-gray-600">Ticket No</th>
+              <th className="p-4 font-medium text-gray-600">Loại</th>
+              <th className="p-4 font-medium text-gray-600">Tiêu đề</th>
+              <th className="p-4 font-medium text-gray-600">Mức độ</th>
+              <th className="p-4 font-medium text-gray-600">Trạng thái</th>
+              <th className="p-4 font-medium text-gray-600">Người báo cáo</th>
+              <th className="p-4 font-medium text-gray-600">Hạn SLA</th>
+              <th className="p-4 font-medium w-10"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-800/60">
+            {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">Đang tải danh sách sự cố...</td>
+                  <td colSpan={8} className="p-8 text-center text-gray-500">Đang tải danh sách sự cố...</td>
                 </tr>
               ) : incidents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">
+                  <td colSpan={8} className="p-8 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <CheckCircle2 size={40} className="text-gray-300 mb-2" />
                       <p>Tuyệt vời! Hiện không có sự cố nào.</p>
@@ -166,10 +182,13 @@ export function IncidentListPage() {
                     <tr 
                       key={incident.id} 
                       className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/incidents/${incident.id}`)}
+                      onClick={() => navigate(`/helpdesk/incidents/${incident.id}`)}
                     >
                       <td className="p-4 font-mono font-medium text-primary">
                         {incident.incidentNo}
+                      </td>
+                      <td className="p-4">
+                        {getTypeBadge(incident.ticketType)}
                       </td>
                       <td className="p-4 font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
                         {incident.title}
@@ -200,8 +219,17 @@ export function IncidentListPage() {
               )}
             </tbody>
           </table>
-        </div>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateIncidentModal 
+          onClose={() => setIsCreateModalOpen(false)} 
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

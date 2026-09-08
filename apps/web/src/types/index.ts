@@ -187,6 +187,8 @@ export interface Incident {
   id: string;
   incidentNo: string;
   title: string;
+  ticketType?: string;
+  requestDetails?: any;
   category: string;
   status: 'NEW' | 'IN_PROGRESS' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
   priority: 'P1' | 'P2' | 'P3' | 'P4';

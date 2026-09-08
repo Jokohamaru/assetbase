@@ -16,8 +16,10 @@ type CreateIncidentRequest struct {
 	DepartmentId         string `json:"departmentId,omitempty"`
 	AssignedDepartmentId string `json:"assignedDepartmentId,omitempty"`
 	LocationId           string `json:"locationId,omitempty"`
-	AssetId              string `json:"assetId,omitempty"`
-	IsSecurityIncident   bool   `json:"isSecurityIncident"`
+	AssetId              string      `json:"assetId,omitempty"`
+	IsSecurityIncident   bool        `json:"isSecurityIncident"`
+	TicketType           string      `json:"ticketType,omitempty"`
+	RequestDetails       interface{} `json:"requestDetails,omitempty"`
 }
 
 type UpdateIncidentStatusRequest struct {
@@ -68,5 +70,13 @@ type IncidentResponse struct {
 	ClosedAt             *time.Time                 `json:"closedAt,omitempty"`
 	AssignedToId         *string                    `json:"assignedToId,omitempty"`
 	AssignedDepartmentId *string                    `json:"assignedDepartmentId,omitempty"`
+	TicketType           string                     `json:"ticketType"`
+	RequestDetails       interface{}                `json:"requestDetails,omitempty"`
 	Activities           []IncidentActivityResponse `json:"activities,omitempty"`
+}
+
+type FulfillIncidentRequest struct {
+	AssetId      string `json:"assetId" binding:"required"`
+	ConditionOut string `json:"conditionOut" binding:"required"`
+	Note         string `json:"note"`
 }

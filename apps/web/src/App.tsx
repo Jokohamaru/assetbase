@@ -23,7 +23,6 @@ import { RiskDetailPage } from './features/risks/RiskDetailPage';
 import { MyAssetsPage } from './features/user-portal/MyAssetsPage';
 import { MyIncidentsPage } from './features/user-portal/MyIncidentsPage';
 import { MyRequestsPage } from './features/user-portal/MyRequestsPage';
-import { AssetRequestsPage } from './features/assets/AssetRequestsPage';
 import type { AppUser, BrandingSettings } from './types';
 
 export default function App() {
@@ -87,7 +86,6 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assets" element={<AssetBookPage />} />
         <Route path="/assets/:id" element={<AssetDetailPage />} />
-        <Route path="/asset-requests" element={<AssetRequestsPage />} />
         <Route path="/scanner" element={<ScannerPage />} />
         <Route path="/inventory" element={<InventoryListPage />} />
         <Route path="/inventory/:id" element={<InventoryDetailPage />} />
