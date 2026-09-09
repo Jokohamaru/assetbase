@@ -29,6 +29,11 @@ func Load() *Config {
 	
 	seed := os.Getenv("ASSETBASE_DEMO_SEED") == "true"
 
+	adminPwd := os.Getenv("INITIAL_ADMIN_PASSWORD")
+	if adminPwd == "" {
+		adminPwd = "Admin@12345"
+	}
+
 	return &Config{
 		Port:                 os.Getenv("PORT"),
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
@@ -36,7 +41,7 @@ func Load() *Config {
 		JWTExpiryHours:       expiry,
 		BcryptCost:           cost,
 		CORSOrigin:           os.Getenv("CORS_ORIGIN"),
-		InitialAdminPassword: os.Getenv("INITIAL_ADMIN_PASSWORD"),
+		InitialAdminPassword: adminPwd,
 		DemoSeed:             seed,
 	}
 }

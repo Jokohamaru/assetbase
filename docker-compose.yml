@@ -11,6 +11,8 @@ services:
       - pg_local_data:/var/lib/postgresql/data
     networks:
       - internal_network
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dev_user -d app_db"]
       interval: 5s
@@ -19,14 +21,19 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: apps/api/Dockerfile
+      context: ./apps/api
+      dockerfile: Dockerfile
     container_name: local_backend
     restart: unless-stopped
     environment:
       DATABASE_URL: "postgresql://dev_user:dev_password@postgres:5432/app_db?schema=public&sslmode=disable"
       PORT: 8080
       GIN_MODE: debug
+      JWT_SECRET: "dev-secret-key-change-this-in-production"
+      JWT_EXPIRY_HOURS: "12"
+      CORS_ORIGIN: "http://localhost:3000"
+      INITIAL_ADMIN_PASSWORD: "Admin@12345"
+      BCRYPT_COST: "10"
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
@@ -39,8 +46,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: apps/web/Dockerfile
+      context: ./apps/web
+      dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:8080/api/v1
     container_name: local_frontend

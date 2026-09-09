@@ -1,9 +1,9 @@
 # Stage 1: Build binary
-FROM golang:1.26-alpine3.20 AS builder
+FROM golang:alpine AS builder
 
 ENV GOTOOLCHAIN=auto
 
-# Không dùng || true để đảm bảo không bỏ qua lỗi mạng
+# Cài đặt thư viện phụ trợ build
 RUN apk add --no-cache git ca-certificates openssl
 
 WORKDIR /app
@@ -12,18 +12,20 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy schema trước để generate code (tận dụng cache nếu code go thay đổi mà schema không đổi)
-COPY prisma ./prisma
-RUN go run github.com/steebchen/prisma-client-go generate
-
-# Copy toàn bộ mã nguồn còn lại
+# Copy mã nguồn
 COPY . .
 
-# Build static binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
+# Xóa các file Prisma cũ được copy từ máy local nếu có
+RUN rm -rf prisma/db
 
-# Stage 2: Minimal Runtime (Pin cụ thể bản Alpine tương ứng với builder)
-FROM alpine:3.20 AS runner
+# Generate Prisma Client Go code tương thích với Linux Alpine
+RUN go run github.com/steebchen/prisma-client-go generate
+
+# Build static binary với cờ -p 1 (đơn tiến trình) để tiết kiệm bộ nhớ RAM, tránh bị OOM (signal killed)
+RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -ldflags="-s -w" -o server ./cmd/server
+
+# Stage 2: Minimal Runtime
+FROM alpine:latest AS runner
 
 RUN apk add --no-cache ca-certificates openssl tzdata
 

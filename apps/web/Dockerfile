@@ -4,16 +4,14 @@ FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 ARG APP_VERSION=development
 WORKDIR /app
 
-# Copy lockfiles và package.json từng package để tối ưu layer cache
+# Copy package.json và package-lock.json của frontend
 COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/package.json
-COPY apps/api/package.json ./apps/api/package.json
 
-# Tận dụng cache mount để không phải tải lại node_modules từ đầu
+# Tận dụng cache mount để cài đặt npm packages
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 
-# Copy mã nguồn frontend
-COPY apps/web ./apps/web
+# Copy toàn bộ mã nguồn frontend
+COPY . .
 
 # Đóng gói biến môi trường Vite vào static bundle lúc build
 ARG VITE_API_URL=/api/v1
@@ -21,13 +19,14 @@ ARG VITE_DEMO_MODE=false
 ENV VITE_API_URL=${VITE_API_URL} \
     VITE_DEMO_MODE=${VITE_DEMO_MODE}
 
-RUN npm run build --workspace @assetflow/web
+# Build static bundle với Vite directly
+RUN npx vite build
 
-# Stage Runtime: Nginx unprivileged chạy cổng 8080 với user non-root (UID 101)
+# Stage Runtime: Nginx unprivileged
 FROM nginxinc/nginx-unprivileged:1.30-alpine AS runtime
 
-COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 
 USER 101
 EXPOSE 8080

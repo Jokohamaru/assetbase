@@ -4,5 +4,6 @@
 server
 bin/
 uploads/
+prisma/db
 *.tmp
 *.log
