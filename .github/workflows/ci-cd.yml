@@ -111,15 +111,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Đồng bộ file docker-compose.prod.yml và config sang EC2
+      # Đồng bộ file docker-compose.prod.yml và schema.prisma sang EC2
       - name: Copy deployment files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml"
+          source: "docker-compose.prod.yml,apps/api/prisma/schema.prisma"
           target: "~/app"
+          strip_components: 3 # Giúp cắt bỏ "apps/api/prisma/" để schema.prisma nằm ngang hàng với docker-compose.prod.yml
 
       # Thực thi lệnh deploy trực tiếp trên EC2
       - name: Execute deployment commands via SSH
@@ -139,8 +140,14 @@ jobs:
             echo "===> Pulling latest images..."
             docker compose -f docker-compose.prod.yml pull
 
+            echo "===> Updating Database Schema..."
+            docker compose -f docker-compose.prod.yml --profile setup run --rm db-migrator
+
             echo "===> Updating containers..."
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            
+            echo "===> Restarting backend to trigger seeding..."
+            docker restart prod_backend
 
             echo "===> Cleaning unused images to save disk..."
             docker image prune -f

@@ -12,6 +12,27 @@ services:
     networks:
       - internal_network
     # Không expose port 5432 ra host!
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db-migrator:
+    image: node:20-alpine
+    container_name: prod_db_migrator
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public&sslmode=disable"
+    volumes:
+      - ./schema.prisma:/schema.prisma
+    command: sh -c "npx prisma db push --schema=/schema.prisma --accept-data-loss"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_network
+    profiles:
+      - setup
 
   backend:
     image: ${DOCKER_USERNAME}/assetflow-api:latest
@@ -21,10 +42,16 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public&sslmode=disable"
       PORT: 8080
       GIN_MODE: release
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY_HOURS: ${JWT_EXPIRY_HOURS}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      BCRYPT_COST: ${BCRYPT_COST}
     volumes:
       - prod_uploads:/app/uploads
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy # Đợi DB sẵn sàng mới bật backend
     networks:
       - internal_network
 
