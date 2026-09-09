@@ -1,10 +1,10 @@
 # Stage 1: Build binary
-FROM golang:alpine AS builder
+FROM golang:1.23-bookworm AS builder
 
 ENV GOTOOLCHAIN=auto
 
 # Cài đặt thư viện phụ trợ build
-RUN apk add --no-cache git ca-certificates openssl
+RUN apt-get update && apt-get install -y git ca-certificates openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
