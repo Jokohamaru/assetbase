@@ -277,6 +277,12 @@ export function IncidentDetailPage() {
                 <span className="text-gray-500 flex items-center gap-2"><User size={16} /> Người báo cáo</span>
                 <span className="font-medium text-gray-900 dark:text-white">{incident.reporterName}</span>
               </div>
+              {(incident as any).reporterContact && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 flex items-center gap-2">📱 Liên hệ / Vị trí</span>
+                  <span className="font-medium text-indigo-600 dark:text-indigo-400">{(incident as any).reporterContact}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 flex items-center gap-2"><Calendar size={16} /> Thời gian</span>
                 <span className="text-gray-900 dark:text-white">{new Date(incident.reportedAt).toLocaleString('vi-VN')}</span>
@@ -289,6 +295,43 @@ export function IncidentDetailPage() {
                 <span className="text-gray-500 flex items-center gap-2"><MapPin size={16} /> Mức độ ảnh hưởng</span>
                 <span className="text-gray-900 dark:text-white">{incident.impact}</span>
               </div>
+
+              {(() => {
+                let details: any = {};
+                try {
+                  if (typeof incident.requestDetails === 'string') {
+                    details = JSON.parse(incident.requestDetails);
+                  } else if (incident.requestDetails) {
+                    details = incident.requestDetails;
+                  }
+                } catch(e) {}
+                
+                if (!details || Object.keys(details).length === 0) return null;
+
+                return (
+                  <div className="pt-3 border-t border-gray-100 dark:border-slate-800 space-y-3">
+                    <p className="font-medium text-xs text-gray-400 uppercase tracking-wider">Chi tiết Yêu cầu</p>
+                    {details.purpose && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Mục đích</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{details.purpose}</span>
+                      </div>
+                    )}
+                    {details.requestedFor && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Đối tượng nhận</span>
+                        <span className="font-medium text-blue-600 dark:text-blue-400">{details.requestedFor}</span>
+                      </div>
+                    )}
+                    {details.requiredDate && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Ngày cần nhận</span>
+                        <span className="font-medium text-amber-600 dark:text-amber-400">{details.requiredDate}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

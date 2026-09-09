@@ -12,6 +12,9 @@ interface Props {
 export function CreateIncidentModal({ onClose, onSuccess, prefilledAsset }: Props) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('HARDWARE');
+  const [urgency, setUrgency] = useState('MEDIUM');
+  const [reporterContact, setReporterContact] = useState('');
+  const [attachmentUrl, setAttachmentUrl] = useState('');
   const [description, setDescription] = useState('');
   const [assetId, setAssetId] = useState(prefilledAsset?.id || '');
   
@@ -54,14 +57,25 @@ export function CreateIncidentModal({ onClose, onSuccess, prefilledAsset }: Prop
     setLoading(true);
 
     try {
+      let priority = 'P3';
+      if (urgency === 'CRITICAL') priority = 'P1';
+      else if (urgency === 'HIGH') priority = 'P2';
+      else if (urgency === 'LOW') priority = 'P4';
+
+      let finalDesc = description;
+      if (attachmentUrl.trim()) {
+        finalDesc += `\n\n[Hình ảnh đính kèm]: ${attachmentUrl.trim()}`;
+      }
+
       await apiClient.post('/incidents', {
         title,
         category,
-        description,
+        description: finalDesc,
         assetId: assetId || undefined,
-        priority: 'P3', // Default
-        impact: 'MEDIUM',
-        urgency: 'MEDIUM',
+        priority,
+        impact: urgency === 'CRITICAL' ? 'HIGH' : urgency === 'HIGH' ? 'HIGH' : 'MEDIUM',
+        urgency,
+        reporterContact: reporterContact.trim() || undefined,
         reporterName: currentUser ? currentUser.name : 'Nhân viên', 
       });
       onSuccess();
@@ -131,19 +145,58 @@ export function CreateIncidentModal({ onClose, onSuccess, prefilledAsset }: Prop
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Loại sự cố <span className="text-red-500">*</span></label>
+                <select 
+                  required
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="HARDWARE">Phần cứng</option>
+                  <option value="SOFTWARE">Phần mềm</option>
+                  <option value="NETWORK">Mạng / Internet</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mức độ khẩn cấp <span className="text-red-500">*</span></label>
+                <select 
+                  required
+                  value={urgency}
+                  onChange={(e) => setUrgency(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="LOW">Thấp (Thong thả)</option>
+                  <option value="MEDIUM">Trung bình (Vừa phải)</option>
+                  <option value="HIGH">Cao (Cần hỗ trợ sớm)</option>
+                  <option value="CRITICAL">Khẩn cấp (Gián đoạn công việc)</option>
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Loại sự cố <span className="text-red-500">*</span></label>
-              <select 
-                required
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thông tin liên hệ / Vị trí chỗ ngồi</label>
+              <input 
+                type="text"
+                value={reporterContact}
+                onChange={(e) => setReporterContact(e.target.value)}
+                placeholder="VD: 0987654321 - Tầng 3, Phòng 302"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-              >
-                <option value="HARDWARE">Phần cứng</option>
-                <option value="SOFTWARE">Phần mềm</option>
-                <option value="NETWORK">Mạng / Internet</option>
-                <option value="OTHER">Khác</option>
-              </select>
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link ảnh minh họa / Bằng chứng lỗi (nếu có)</label>
+              <input 
+                type="url"
+                value={attachmentUrl}
+                onChange={(e) => setAttachmentUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <div>

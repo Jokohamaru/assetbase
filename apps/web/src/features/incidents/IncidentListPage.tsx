@@ -31,10 +31,10 @@ export function IncidentListPage() {
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
-      case 'P1': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">P1 - Rất cao</span>;
-      case 'P2': return <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">P2 - Cao</span>;
-      case 'P3': return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">P3 - Trung bình</span>;
-      case 'P4': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">P4 - Thấp</span>;
+      case 'P1': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">Rất cao</span>;
+      case 'P2': return <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">Cao</span>;
+      case 'P3': return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">Trung bình</span>;
+      case 'P4': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Thấp</span>;
       default: return <span>{priority}</span>;
     }
   };

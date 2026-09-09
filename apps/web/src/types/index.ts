@@ -196,6 +196,7 @@ export interface Incident {
   urgency: string;
   description: string;
   reporterName: string;
+  reporterContact?: string;
   reportedAt: string;
   slaResponseDueAt: string;
   slaResolutionDueAt: string;

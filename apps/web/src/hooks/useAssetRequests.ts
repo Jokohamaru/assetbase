@@ -73,19 +73,36 @@ export function useMyAssetRequests(page = 1, limit = 20) {
 export function useCreateAssetRequest() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { assetCategoryId: string; purpose: string; description: string }) => {
+    mutationFn: async (data: { 
+      assetCategoryId: string; 
+      purpose: string; 
+      description: string;
+      requiredDate?: string;
+      requestedFor?: string;
+      urgency?: string;
+      reporterContact?: string;
+    }) => {
+      const urgencyVal = data.urgency || 'LOW';
+      let priority = 'P4';
+      if (urgencyVal === 'CRITICAL') priority = 'P1';
+      else if (urgencyVal === 'HIGH') priority = 'P2';
+      else if (urgencyVal === 'MEDIUM') priority = 'P3';
+
       const payload = {
         title: `Yêu cầu cấp phát: ${data.purpose}`,
         category: 'HARDWARE',
-        priority: 'P3',
-        impact: 'LOW',
-        urgency: 'LOW',
+        priority,
+        impact: urgencyVal === 'CRITICAL' || urgencyVal === 'HIGH' ? 'HIGH' : 'LOW',
+        urgency: urgencyVal,
         description: data.description,
+        reporterContact: data.reporterContact || undefined,
         reporterName: 'Self Service',
         ticketType: 'SERVICE_REQUEST',
         requestDetails: {
           assetCategoryId: data.assetCategoryId,
-          purpose: data.purpose
+          purpose: data.purpose,
+          requiredDate: data.requiredDate || undefined,
+          requestedFor: data.requestedFor || 'SELF'
         }
       };
       const res = await apiClient.post('/incidents', payload);
