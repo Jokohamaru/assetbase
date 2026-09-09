@@ -10,6 +10,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/ci-cd.yml"
+      - "docker-compose.prod.yml"
   workflow_dispatch: # Cho phép bấm nút chạy thủ công trên giao diện GitHub Actions
 
 concurrency:
