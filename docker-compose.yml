@@ -1,22 +1,61 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16-alpine
+    container_name: local_postgres
+    restart: unless-stopped
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1
-      - POSTGRES_DB=assetbase
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: app_db
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pg_local_data:/var/lib/postgresql/data
+    networks:
+      - internal_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d assetbase" ]
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d app_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: local_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "postgresql://dev_user:dev_password@postgres:5432/app_db?schema=public&sslmode=disable"
+      PORT: 8080
+      GIN_MODE: debug
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy # Đợi DB chuyển trạng thái healthy mới bật backend
+    ports:
+      - "8080:8080"
+    networks:
+      - internal_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8080/api/v1
+    container_name: local_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:8080" # Container listen port 8080 (nginx-unprivileged), map ra port 3000 ngoài máy
+    depends_on:
+      - backend
+    networks:
+      - internal_network
+
 volumes:
-  pgdata:
-    driver: local
+  pg_local_data:
+  backend_uploads:
+
+networks:
+  internal_network:
+    driver: bridge
