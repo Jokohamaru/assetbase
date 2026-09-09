@@ -1,0 +1,151 @@
+name: Continuous Integration & Delivery
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "apps/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/ci-cd.yml"
+  workflow_dispatch: # Cho phép bấm nút chạy thủ công trên giao diện GitHub Actions
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true # Tự hủy job cũ nếu push commit mới liên tục
+
+jobs:
+  # ==========================================
+  # JOB 1: Build & Push Backend (Go + Prisma)
+  # ==========================================
+  build-backend:
+    name: Build & Push Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/assetflow-api
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/api
+          file: apps/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          # Tận dụng cache của GitHub Actions để tăng tốc độ build
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+  # ==========================================
+  # JOB 2: Build & Push Frontend (React SPA)
+  # ==========================================
+  build-frontend:
+    name: Build & Push Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/assetflow-web
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          build-args: |
+            VITE_API_URL=/api/v1
+            VITE_DEMO_MODE=false
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+# ==========================================
+  # JOB 3: Deploy to AWS EC2 via SSH
+  # ==========================================
+  deploy-to-ec2:
+    name: Deploy to Production EC2
+    runs-on: ubuntu-latest
+    # Chỉ chạy khi cả 2 job build đều thành công
+    needs: [build-backend, build-frontend]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Đồng bộ file docker-compose.prod.yml và config sang EC2
+      - name: Copy deployment files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "~/app"
+
+      # Thực thi lệnh deploy trực tiếp trên EC2
+      - name: Execute deployment commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD
+          script: |
+            set -e # Dừng ngay nếu có bất kỳ lệnh nào fail
+            cd ~/app
+
+            echo "===> Authenticating with Docker Hub..."
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+            echo "===> Pulling latest images..."
+            docker compose -f docker-compose.prod.yml pull
+
+            echo "===> Updating containers..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo "===> Cleaning unused images to save disk..."
+            docker image prune -f
+
+            echo "===> Deployment successfully completed!"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
