@@ -163,6 +163,7 @@ func main() {
 				incidents.PUT("/:id/status", incidentHandler.UpdateStatus)
 				incidents.PUT("/:id/assign", incidentHandler.AssignIncident)
 				incidents.POST("/:id/fulfill", incidentHandler.FulfillIncident)
+				incidents.POST("/:id/activities", incidentHandler.AddActivity)
 			}
 
 			// Digital Entitlements routes

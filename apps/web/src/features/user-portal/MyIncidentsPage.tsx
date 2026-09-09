@@ -3,6 +3,7 @@ import { Plus, Search, Activity, AlertCircle, Clock, CheckCircle, Package } from
 import { apiClient } from '../../lib/api-client';
 import type { Incident } from '../../types';
 import { CreateIncidentModal } from './components/CreateIncidentModal';
+import { UserIncidentDetailModal } from './components/UserIncidentDetailModal';
 
 export function MyIncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -11,6 +12,7 @@ export function MyIncidentsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
 
   const fetchMyIncidents = async () => {
     try {
@@ -126,12 +128,16 @@ export function MyIncidentsPage() {
                 {incidents.map((incident) => {
                   const statusConf = getStatusConfig(incident.status);
                   const StatusIcon = statusConf.icon;
-                  const isRequest = incident.title.includes('[Yêu cầu thiết bị]');
+                  const isRequest = incident.ticketType === 'SERVICE_REQUEST' || incident.title.includes('[Yêu cầu thiết bị]');
                   
                   return (
-                    <tr key={incident.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <tr 
+                      key={incident.id} 
+                      onClick={() => setSelectedIncidentId(incident.id)}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-medium text-gray-900 dark:text-white">{incident.incidentNo}</span>
+                        <span className="font-medium text-indigo-600 dark:text-indigo-400">{incident.incidentNo}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -173,6 +179,13 @@ export function MyIncidentsPage() {
             setIsModalOpen(false);
             fetchMyIncidents();
           }}
+        />
+      )}
+
+      {selectedIncidentId && (
+        <UserIncidentDetailModal 
+          incidentId={selectedIncidentId} 
+          onClose={() => setSelectedIncidentId(null)} 
         />
       )}
     </div>

@@ -182,7 +182,7 @@ export function IncidentListPage() {
                     <tr 
                       key={incident.id} 
                       className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/helpdesk/incidents/${incident.id}`)}
+                      onClick={() => navigate(`/incidents/${incident.id}`)}
                     >
                       <td className="p-4 font-mono font-medium text-primary">
                         {incident.incidentNo}

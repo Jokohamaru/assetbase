@@ -117,3 +117,22 @@ func (h *IncidentHandler) FulfillIncident(c *gin.Context) {
 
 	response.Success(c, incident)
 }
+
+func (h *IncidentHandler) AddActivity(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.AddIncidentActivityRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userID := c.GetString("userID")
+
+	activity, err := h.Service.AddActivity(c.Request.Context(), id, userID, req)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, activity)
+}

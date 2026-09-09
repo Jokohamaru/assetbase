@@ -80,3 +80,8 @@ type FulfillIncidentRequest struct {
 	ConditionOut string `json:"conditionOut" binding:"required"`
 	Note         string `json:"note"`
 }
+
+type AddIncidentActivityRequest struct {
+	Type string `json:"type" binding:"required"` // e.g. "COMMENT", "INTERNAL_NOTE"
+	Note string `json:"note" binding:"required"`
+}

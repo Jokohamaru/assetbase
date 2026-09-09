@@ -339,3 +339,19 @@ func (s *IncidentService) FulfillIncident(ctx context.Context, incidentId string
 
 	return updatedReq, err
 }
+
+func (s *IncidentService) AddActivity(ctx context.Context, incidentID string, actorID string, req dto.AddIncidentActivityRequest) (*db.IncidentActivityModel, error) {
+	incident, err := database.Client.Incident.FindUnique(db.Incident.ID.Equals(incidentID)).Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("incident not found")
+	}
+
+	activity, err := database.Client.IncidentActivity.CreateOne(
+		db.IncidentActivity.Type.Set(req.Type),
+		db.IncidentActivity.Note.Set(req.Note),
+		db.IncidentActivity.Incident.Link(db.Incident.ID.Equals(incident.ID)),
+		db.IncidentActivity.Actor.Link(db.User.ID.Equals(actorID)),
+	).Exec(ctx)
+
+	return activity, err
+}

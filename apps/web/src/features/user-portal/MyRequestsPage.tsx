@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ClipboardList, Plus, Eye, XCircle } from 'lucide-react';
 import { useMyAssetRequests, useCancelAssetRequest, type AssetRequest } from '../../hooks/useAssetRequests';
 import { CreateAssetRequestModal } from './components/CreateAssetRequestModal';
-import { AssetRequestDetailModal } from './components/AssetRequestDetailModal';
+import { UserIncidentDetailModal } from './components/UserIncidentDetailModal';
 
 const STATUS_TABS = [
   { id: 'ALL', label: 'Tất cả' },
@@ -23,8 +23,7 @@ function formatDate(dateString: string) {
 export function MyRequestsPage() {
   const [activeTab, setActiveTab] = useState('ALL');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<AssetRequest | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   
   const { data, isLoading } = useMyAssetRequests(1, 100); 
   const cancelMutation = useCancelAssetRequest();
@@ -56,11 +55,6 @@ export function MyRequestsPage() {
     }
   };
 
-  const handleView = (req: AssetRequest) => {
-    setSelectedRequest(req);
-    setIsDetailModalOpen(true);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -72,7 +66,7 @@ export function MyRequestsPage() {
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-sm"
         >
           <Plus className="w-4 h-4 mr-2" />
           Tạo yêu cầu mới
@@ -126,8 +120,12 @@ export function MyRequestsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr 
+                      key={req.id} 
+                      onClick={() => setSelectedIncidentId(req.id)}
+                      className="hover:bg-gray-50 cursor-pointer"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                         {req.requestNo}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -144,9 +142,12 @@ export function MyRequestsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => handleView(req)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedIncidentId(req.id);
+                          }}
                           className="text-blue-600 hover:text-blue-900 mx-2"
-                          title="Xem chi tiết"
+                          title="Xem chi tiết & Chat"
                         >
                           <Eye className="w-5 h-5" />
                         </button>
@@ -173,11 +174,13 @@ export function MyRequestsPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
-      <AssetRequestDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        request={selectedRequest}
-      />
+
+      {selectedIncidentId && (
+        <UserIncidentDetailModal
+          incidentId={selectedIncidentId}
+          onClose={() => setSelectedIncidentId(null)}
+        />
+      )}
     </div>
   );
 }

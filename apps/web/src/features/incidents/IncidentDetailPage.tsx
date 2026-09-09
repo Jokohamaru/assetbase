@@ -23,6 +23,9 @@ export function IncidentDetailPage() {
     rootCause: ''
   });
 
+  const [commentNote, setCommentNote] = useState('');
+  const [commentType, setCommentType] = useState<'COMMENT' | 'NOTE'>('COMMENT');
+
   const { data: incidentRes, isLoading } = useQuery({
     queryKey: ['incidents', id],
     queryFn: async () => {
@@ -30,6 +33,20 @@ export function IncidentDetailPage() {
       return res.data;
     },
     enabled: !!id
+  });
+
+  const addActivityMutation = useMutation({
+    mutationFn: async (payload: { type: string; note: string }) => {
+      const res = await api.post(`/incidents/${id}/activities`, payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incidents', id] });
+      setCommentNote('');
+    },
+    onError: (err: any) => {
+      alert(`Lỗi khi gửi bình luận: ${err.response?.data?.error || err.message}`);
+    }
   });
 
   const updateStatusMutation = useMutation({
@@ -335,35 +352,93 @@ export function IncidentDetailPage() {
             </div>
           </div>
 
-          {/* Activity Timeline */}
+          {/* Activity Timeline & Comment Box */}
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Dòng thời gian (Timeline)</h3>
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Trao đổi & Dòng thời gian</h3>
+              <div className="flex gap-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setCommentType('COMMENT')}
+                  className={`px-2 py-1 rounded font-medium ${commentType === 'COMMENT' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                  Bình luận
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCommentType('NOTE')}
+                  className={`px-2 py-1 rounded font-medium ${commentType === 'NOTE' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                  Ghi chú nội bộ
+                </button>
+              </div>
             </div>
+
+            <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/30">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!commentNote.trim()) return;
+                  addActivityMutation.mutate({ type: commentType, note: commentNote.trim() });
+                }}
+                className="space-y-3"
+              >
+                <textarea
+                  required
+                  rows={2}
+                  value={commentNote}
+                  onChange={(e) => setCommentNote(e.target.value)}
+                  placeholder={commentType === 'COMMENT' ? "Nhập tin nhắn / phản hồi gửi cho người báo cáo..." : "Nhập ghi chú kỹ thuật nội bộ (chỉ IT thấy)..."}
+                  className="w-full border border-gray-300 dark:border-slate-700 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={addActivityMutation.isPending || !commentNote.trim()}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50 ${commentType === 'COMMENT' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-amber-600 hover:bg-amber-700'}`}
+                  >
+                    {addActivityMutation.isPending ? 'Đang gửi...' : commentType === 'COMMENT' ? 'Gửi bình luận' : 'Lưu ghi chú nội bộ'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
             <div className="p-5">
               {(!incident.activities || incident.activities.length === 0) ? (
                 <div className="text-sm text-gray-500 text-center py-4">Chưa có hoạt động nào</div>
               ) : (
                 <div className="relative border-l border-gray-200 dark:border-slate-700 ml-3 space-y-6">
-                  {incident.activities.map((activity, idx) => (
+                  {incident.activities.map((activity) => (
                     <div key={activity.id} className="pl-6 relative">
-                      <div className="absolute w-3 h-3 bg-primary rounded-full -left-1.5 top-1.5 ring-4 ring-white dark:ring-slate-900"></div>
+                      <div className={`absolute w-3 h-3 rounded-full -left-1.5 top-1.5 ring-4 ring-white dark:ring-slate-900 ${
+                        activity.type === 'COMMENT' ? 'bg-indigo-600' :
+                        activity.type === 'NOTE' ? 'bg-amber-500' :
+                        activity.type === 'FULFILLED' ? 'bg-green-600' : 'bg-primary'
+                      }`}></div>
                       <div className="flex justify-between items-start mb-1">
-                        <div className="font-medium text-sm text-gray-900 dark:text-white">
+                        <div className="font-medium text-sm text-gray-900 dark:text-white flex items-center gap-2">
                           {activity.type === 'STATUS_CHANGE' && `Chuyển sang ${activity.toStatus}`}
                           {activity.type === 'CREATED' && `Đã ghi nhận sự cố`}
                           {activity.type === 'ASSIGNMENT' && `Cập nhật người xử lý`}
+                          {activity.type === 'FULFILLED' && `Đã cấp phát thiết bị`}
+                          {activity.type === 'COMMENT' && (
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300">
+                              Bình luận
+                            </span>
+                          )}
+                          {activity.type === 'NOTE' && (
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                              Ghi chú nội bộ
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-gray-400">
                           {new Date(activity.createdAt).toLocaleString('vi-VN')}
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-wrap">
                         {activity.note}
                       </p>
-                      <div className="text-xs text-gray-500 mt-2 font-medium">
-                        Bởi: ID {activity.performedBy.substring(0,8)}
-                      </div>
                     </div>
                   ))}
                 </div>
