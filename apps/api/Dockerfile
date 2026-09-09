@@ -25,12 +25,12 @@ RUN go run github.com/steebchen/prisma-client-go generate
 RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -ldflags="-s -w" -o server ./cmd/server
 
 # Stage 2: Minimal Runtime
-FROM alpine:latest AS runner
+FROM debian:bookworm-slim AS runner
 
-RUN apk add --no-cache ca-certificates openssl tzdata
+RUN apt-get update && apt-get install -y ca-certificates openssl tzdata && rm -rf /var/lib/apt/lists/*
 
 # Tạo user & group bảo mật
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
 WORKDIR /app
 
