@@ -111,16 +111,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Đồng bộ file docker-compose.prod.yml và schema.prisma sang EC2
-      - name: Copy deployment files to EC2
+      # Đồng bộ file docker-compose.prod.yml sang EC2
+      - name: Copy docker-compose
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml,apps/api/prisma/schema.prisma"
+          source: "docker-compose.prod.yml"
           target: "~/app"
-          strip_components: 3 # Giúp cắt bỏ "apps/api/prisma/" để schema.prisma nằm ngang hàng với docker-compose.prod.yml
+
+      # Đồng bộ file schema.prisma sang EC2
+      - name: Copy schema
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "apps/api/prisma/schema.prisma"
+          target: "~/app"
+          strip_components: 3
 
       # Thực thi lệnh deploy trực tiếp trên EC2
       - name: Execute deployment commands via SSH
