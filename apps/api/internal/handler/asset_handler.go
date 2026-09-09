@@ -38,6 +38,12 @@ func (h *AssetHandler) ListAssets(c *gin.Context) {
 	my := c.Query("my") == "true"
 	
 	userID, _ := c.Get("userID")
+	userRole, _ := c.Get("userRole")
+
+	if !my && userRole != "ADMIN" {
+		response.Error(c, http.StatusForbidden, "Forbidden: insufficient permissions")
+		return
+	}
 
 	data, err := h.Service.ListAssets(c.Request.Context(), page, limit, search, category, status, department, my, userID.(string))
 	if err != nil {

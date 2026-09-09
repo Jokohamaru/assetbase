@@ -40,6 +40,12 @@ func (h *IncidentHandler) ListIncidents(c *gin.Context) {
 	ticketType := c.Query("ticketType")
 	my := c.Query("my") == "true"
 	userID := c.GetString("userID")
+	userRole := c.GetString("userRole")
+
+	if !my && userRole != "ADMIN" {
+		response.Error(c, http.StatusForbidden, "Forbidden: insufficient permissions")
+		return
+	}
 	
 	incidents, err := h.Service.ListIncidents(c.Request.Context(), status, ticketType, my, userID)
 	if err != nil {
@@ -52,9 +58,17 @@ func (h *IncidentHandler) ListIncidents(c *gin.Context) {
 
 func (h *IncidentHandler) GetIncident(c *gin.Context) {
 	id := c.Param("id")
+	userID := c.GetString("userID")
+	userRole := c.GetString("userRole")
+
 	incident, err := h.Service.GetIncident(c.Request.Context(), id)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	if userRole != "ADMIN" && incident.CreatedByID != userID {
+		response.Error(c, http.StatusForbidden, "Forbidden: insufficient permissions")
 		return
 	}
 

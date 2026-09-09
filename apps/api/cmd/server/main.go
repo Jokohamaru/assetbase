@@ -115,6 +115,7 @@ func main() {
 
 			// Dashboard routes
 			dashboard := protected.Group("/dashboard")
+			dashboard.Use(middleware.RequireRole("ADMIN"))
 			{
 				dashboard.GET("/metrics", dashboardHandler.GetMetrics)
 			}
@@ -122,19 +123,20 @@ func main() {
 			// Asset routes
 			assets := protected.Group("/assets")
 			{
-				assets.GET("", assetHandler.ListAssets)
+				assets.GET("", assetHandler.ListAssets) // Handled inside ListAssets (my=true allowed for USER)
 				assets.GET("/:id", assetHandler.GetAsset)
-				assets.POST("", assetHandler.CreateAsset)
-				assets.PUT("/:id", assetHandler.UpdateAsset)
-				assets.DELETE("/:id", assetHandler.DeleteAsset)
+				assets.POST("", middleware.RequireRole("ADMIN"), assetHandler.CreateAsset)
+				assets.PUT("/:id", middleware.RequireRole("ADMIN"), assetHandler.UpdateAsset)
+				assets.DELETE("/:id", middleware.RequireRole("ADMIN"), assetHandler.DeleteAsset)
 
-				assets.POST("/:id/assign", lifecycleHandler.AssignAsset)
-				assets.POST("/:id/return", lifecycleHandler.ReturnAsset)
-				assets.POST("/:id/transfer", lifecycleHandler.TransferAsset)
+				assets.POST("/:id/assign", middleware.RequireRole("ADMIN"), lifecycleHandler.AssignAsset)
+				assets.POST("/:id/return", middleware.RequireRole("ADMIN"), lifecycleHandler.ReturnAsset)
+				assets.POST("/:id/transfer", middleware.RequireRole("ADMIN"), lifecycleHandler.TransferAsset)
 			}
 
 			// Inventory routes
 			inventories := protected.Group("/inventories")
+			inventories.Use(middleware.RequireRole("ADMIN"))
 			{
 				inventories.GET("", inventoryHandler.ListSessions)
 				inventories.GET("/:id", inventoryHandler.GetSession)
@@ -145,6 +147,7 @@ func main() {
 
 			// Import routes
 			imports := protected.Group("/imports")
+			imports.Use(middleware.RequireRole("ADMIN"))
 			{
 				imports.GET("", importHandler.ListBatches)
 				imports.GET("/:id", importHandler.GetBatch)
@@ -157,17 +160,18 @@ func main() {
 			// Incident routes
 			incidents := protected.Group("/incidents")
 			{
-				incidents.GET("", incidentHandler.ListIncidents)
+				incidents.GET("", incidentHandler.ListIncidents) // Handled inside ListIncidents (my=true allowed for USER)
 				incidents.POST("", incidentHandler.CreateIncident)
 				incidents.GET("/:id", incidentHandler.GetIncident)
-				incidents.PUT("/:id/status", incidentHandler.UpdateStatus)
-				incidents.PUT("/:id/assign", incidentHandler.AssignIncident)
-				incidents.POST("/:id/fulfill", incidentHandler.FulfillIncident)
+				incidents.PUT("/:id/status", middleware.RequireRole("ADMIN"), incidentHandler.UpdateStatus)
+				incidents.PUT("/:id/assign", middleware.RequireRole("ADMIN"), incidentHandler.AssignIncident)
+				incidents.POST("/:id/fulfill", middleware.RequireRole("ADMIN"), incidentHandler.FulfillIncident)
 				incidents.POST("/:id/activities", incidentHandler.AddActivity)
 			}
 
 			// Digital Entitlements routes
 			entitlements := protected.Group("/entitlements")
+			entitlements.Use(middleware.RequireRole("ADMIN"))
 			{
 				entitlements.GET("", digitalHandler.ListEntitlements)
 				entitlements.POST("", digitalHandler.CreateEntitlement)
@@ -179,6 +183,7 @@ func main() {
 
 			// Vendors routes
 			vendors := protected.Group("/vendors")
+			vendors.Use(middleware.RequireRole("ADMIN"))
 			{
 				vendors.POST("", vendorHandler.CreateVendor)
 				vendors.GET("", vendorHandler.ListVendors)
@@ -192,6 +197,7 @@ func main() {
 
 			// Risk Assessment routes
 			risks := protected.Group("/risk-assessments")
+			risks.Use(middleware.RequireRole("ADMIN"))
 			{
 				risks.POST("", riskHandler.CreateAssessment)
 				risks.GET("", riskHandler.ListAssessments)
@@ -201,6 +207,7 @@ func main() {
 			}
 
 			riskItems := protected.Group("/risk-items")
+			riskItems.Use(middleware.RequireRole("ADMIN"))
 			{
 				riskItems.PUT("/:itemId/treatment", riskHandler.UpdateRiskTreatment)
 			}

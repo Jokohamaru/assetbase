@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
+import { AdminRoute } from './components/auth/AdminRoute';
+import { UserRoute } from './components/auth/UserRoute';
 import { LoginScreen } from './features/auth/LoginScreen';
 import { MasterDataPage } from './features/master-data/MasterDataPage';
 import { DashboardPage } from './features/dashboard/DashboardPage';
@@ -77,39 +79,43 @@ export default function App() {
       <Route element={<MainLayout user={currentUser} branding={branding} logout={handleLogout} />}>
         <Route path="/" element={<Navigate to={currentUser.role === 'ADMIN' ? "/dashboard" : "/my-assets"} replace />} />
         
-        {/* User Routes */}
-        <Route path="/my-assets" element={<MyAssetsPage />} />
-        <Route path="/my-incidents" element={<MyIncidentsPage />} />
-        <Route path="/my-requests" element={<MyRequestsPage />} />
+        {/* User Protected Routes */}
+        <Route element={<UserRoute user={currentUser} />}>
+          <Route path="/my-assets" element={<MyAssetsPage />} />
+          <Route path="/my-incidents" element={<MyIncidentsPage />} />
+          <Route path="/my-requests" element={<MyRequestsPage />} />
+        </Route>
 
-        {/* Admin Routes */}
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/assets" element={<AssetBookPage />} />
-        <Route path="/assets/:id" element={<AssetDetailPage />} />
-        <Route path="/scanner" element={<ScannerPage />} />
-        <Route path="/inventory" element={<InventoryListPage />} />
-        <Route path="/inventory/:id" element={<InventoryDetailPage />} />
-        <Route path="/inventory/:id/scan" element={<InventoryScanPage />} />
-        <Route path="/imports" element={<ImportPage />} />
-        
-        {/* Incidents */}
-        <Route path="/incidents" element={<IncidentListPage />} />
-        <Route path="/incidents/:id" element={<IncidentDetailPage />} />
+        {/* Admin Protected Routes */}
+        <Route element={<AdminRoute user={currentUser} />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/assets" element={<AssetBookPage />} />
+          <Route path="/assets/:id" element={<AssetDetailPage />} />
+          <Route path="/scanner" element={<ScannerPage />} />
+          <Route path="/inventory" element={<InventoryListPage />} />
+          <Route path="/inventory/:id" element={<InventoryDetailPage />} />
+          <Route path="/inventory/:id/scan" element={<InventoryScanPage />} />
+          <Route path="/imports" element={<ImportPage />} />
+          
+          {/* Incidents */}
+          <Route path="/incidents" element={<IncidentListPage />} />
+          <Route path="/incidents/:id" element={<IncidentDetailPage />} />
 
-        {/* Digital Entitlements */}
-        <Route path="/entitlements" element={<DigitalListPage />} />
-        <Route path="/entitlements/:id" element={<DigitalDetailPage />} />
+          {/* Digital Entitlements */}
+          <Route path="/entitlements" element={<DigitalListPage />} />
+          <Route path="/entitlements/:id" element={<DigitalDetailPage />} />
 
-        {/* Vendors */}
-        <Route path="/vendors" element={<VendorListPage />} />
-        <Route path="/vendors/:id" element={<VendorDetailPage />} />
+          {/* Vendors */}
+          <Route path="/vendors" element={<VendorListPage />} />
+          <Route path="/vendors/:id" element={<VendorDetailPage />} />
 
-        {/* Risk Assessment */}
-        <Route path="/risks" element={<RiskListPage />} />
-        <Route path="/risks/:id" element={<RiskDetailPage />} />
+          {/* Risk Assessment */}
+          <Route path="/risks" element={<RiskListPage />} />
+          <Route path="/risks/:id" element={<RiskDetailPage />} />
 
-        <Route path="/master-data" element={<MasterDataPage />} />
-        <Route path="/history" element={<TransactionHistoryPage />} />
+          <Route path="/master-data" element={<MasterDataPage />} />
+          <Route path="/history" element={<TransactionHistoryPage />} />
+        </Route>
       </Route>
     </Routes>
   );
