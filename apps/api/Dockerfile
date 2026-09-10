@@ -38,13 +38,14 @@ WORKDIR /app
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/prisma ./prisma
 
-# Chuẩn bị folder upload và phân quyền
-RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
+# Chuẩn bị folder upload, tmp và phân quyền
+RUN mkdir -p /app/uploads /app/tmp && chmod 777 /app/tmp && chown -R appuser:appgroup /app
 
 # USER appuser
 
 ENV PORT=8080 \
-    GIN_MODE=release
+    GIN_MODE=release \
+    TMPDIR=/app/tmp
 
 EXPOSE 8080
 
