@@ -1,34 +1,12 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: prod_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - pg_prod_data:/var/lib/postgresql/data
-    networks:
-      - internal_network
-    # Không expose port 5432 ra host!
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   db-migrator:
     image: node:20
     container_name: prod_db_migrator
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public&sslmode=disable"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${RDS_ENDPOINT}:5432/${POSTGRES_DB}?schema=public&sslmode=require"
     volumes:
       - ./schema.prisma:/schema.prisma
     command: sh -c "npx prisma@5 db push --schema=/schema.prisma --accept-data-loss --skip-generate"
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - internal_network
     profiles:
@@ -39,7 +17,7 @@ services:
     container_name: prod_backend
     restart: always
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public&sslmode=disable"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${RDS_ENDPOINT}:5432/${POSTGRES_DB}?schema=public&sslmode=require"
       PORT: 8080
       GIN_MODE: release
       JWT_SECRET: ${JWT_SECRET}
@@ -49,9 +27,6 @@ services:
       BCRYPT_COST: ${BCRYPT_COST}
     volumes:
       - prod_uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy # Đợi DB sẵn sàng mới bật backend
     networks:
       - internal_network
 
@@ -67,7 +42,6 @@ services:
       - internal_network
 
 volumes:
-  pg_prod_data:
   prod_uploads:
 
 networks:
