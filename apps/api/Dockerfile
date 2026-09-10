@@ -41,7 +41,7 @@ COPY --from=builder /app/prisma ./prisma
 # Chuẩn bị folder upload và phân quyền
 RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 
-USER appuser
+# USER appuser
 
 ENV PORT=8080 \
     GIN_MODE=release
