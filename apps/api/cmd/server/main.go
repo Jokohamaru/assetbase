@@ -27,13 +27,11 @@ func main() {
 	database.Connect()
 	defer database.Disconnect()
 
+	// Seed dữ liệu hệ thống bắt buộc (chạy mọi môi trường, idempotent)
+	database.SeedSystemData()
+
 	// Seed Initial Admin
 	database.SeedInitialAdmin(cfg)
-
-	// Seed mock data if enabled
-	if cfg.DemoSeed {
-		database.SeedDemoData(cfg)
-	}
 
 	// Setup Gin
 	mode := os.Getenv("GIN_MODE")

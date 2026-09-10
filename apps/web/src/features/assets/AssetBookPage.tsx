@@ -200,9 +200,10 @@ export function AssetBookPage() {
                 className="block w-full pl-9 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm appearance-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
                 <option value="">Tất cả trạng thái</option>
                 <option value="IN_USE">Đang sử dụng</option>
-                <option value="READY">Sẵn sàng</option>
-                <option value="MAINTENANCE">Bảo trì</option>
-                <option value="BROKEN">Hỏng</option>
+                <option value="READY">Sẵn sàng cấp phát</option>
+                <option value="MAINTENANCE">Đang bảo trì</option>
+                <option value="BROKEN">Hỏng - Chờ xử lý</option>
+                <option value="RETIRED">Đã thanh lý</option>
               </select>
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
                 <ChevronDown size={16} />
