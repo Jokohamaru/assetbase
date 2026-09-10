@@ -52,7 +52,6 @@ func SeedDemoData(cfg *config.Config) {
 		db.User.Role.Set(db.UserRoleUser),
 		db.User.MustChangePassword.Set(false),
 		db.User.PasswordHash.Set(hash),
-	).Link(
 		db.User.Department.Link(db.Department.ID.Equals(itDept.ID)),
 	).Exec(ctx)
 
@@ -64,7 +63,6 @@ func SeedDemoData(cfg *config.Config) {
 		db.User.Role.Set(db.UserRoleUser),
 		db.User.MustChangePassword.Set(false),
 		db.User.PasswordHash.Set(hash),
-	).Link(
 		db.User.Department.Link(db.Department.ID.Equals(hrDept.ID)),
 	).Exec(ctx)
 
@@ -124,7 +122,6 @@ func SeedDemoData(cfg *config.Config) {
 			db.Asset.Name.Set("Dell XPS 15 9520"),
 			db.Asset.Category.Link(db.AssetCategory.ID.Equals(laptopCat.ID)),
 			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusInUse.ID)),
-		).Link(
 			db.Asset.Manufacturer.Link(db.Manufacturer.ID.Equals(dellMan.ID)),
 			db.Asset.Department.Link(db.Department.ID.Equals(itDept.ID)),
 			db.Asset.AssignedUser.Link(db.User.ID.Equals(itUser.ID)),
@@ -138,7 +135,6 @@ func SeedDemoData(cfg *config.Config) {
 			db.Asset.Name.Set("MacBook Air M2"),
 			db.Asset.Category.Link(db.AssetCategory.ID.Equals(laptopCat.ID)),
 			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusInUse.ID)),
-		).Link(
 			db.Asset.Department.Link(db.Department.ID.Equals(hrDept.ID)),
 			db.Asset.AssignedUser.Link(db.User.ID.Equals(hrUser.ID)),
 		).Exec(ctx)
@@ -151,7 +147,6 @@ func SeedDemoData(cfg *config.Config) {
 			db.Asset.Name.Set("LG UltraSharp 27 inch"),
 			db.Asset.Category.Link(db.AssetCategory.ID.Equals(monitorCat.ID)),
 			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusInStorage.ID)),
-		).Link(
 			db.Asset.Department.Link(db.Department.ID.Equals(financeDept.ID)),
 		).Exec(ctx)
 	}
@@ -163,7 +158,6 @@ func SeedDemoData(cfg *config.Config) {
 			db.Asset.Name.Set("Lenovo ThinkPad T14"),
 			db.Asset.Category.Link(db.AssetCategory.ID.Equals(laptopCat.ID)),
 			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusMaintenance.ID)),
-		).Link(
 			db.Asset.Department.Link(db.Department.ID.Equals(itDept.ID)),
 		).Exec(ctx)
 	}
