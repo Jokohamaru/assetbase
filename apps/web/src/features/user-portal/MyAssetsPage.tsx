@@ -18,7 +18,7 @@ export function MyAssetsPage() {
       const res = await apiClient.get('/assets', {
         params: { my: true, search }
       });
-      setAssets(res.data.data.items || []);
+      setAssets(Array.isArray(res.data.data) ? res.data.data : (res.data.data.items || []));
     } catch (err) {
       console.error(err);
     } finally {

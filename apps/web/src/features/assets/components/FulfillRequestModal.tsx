@@ -37,7 +37,7 @@ export function FulfillRequestModal({ isOpen, onClose, request }: Props) {
             params.categoryId = details.assetCategoryId;
           }
           const res = await apiClient.get('/assets', { params });
-          setAssets(res.data.data.items || []);
+          setAssets(Array.isArray(res.data.data) ? res.data.data : (res.data.data.items || []));
         } catch (err) {
           console.error(err);
         } finally {

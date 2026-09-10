@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { ChangePasswordModal } from '../components/auth/ChangePasswordModal';
 import {
   Box, Building2, ChevronRight, HelpCircle, ShieldAlert,
   LockKeyhole, LogOut, Menu, Search, Bell, Settings, History, QrCode, ClipboardList, FileSpreadsheet,
@@ -11,6 +12,7 @@ import { useAdminAssetRequests } from '../hooks/useAssetRequests';
 
 export function MainLayout({ user, branding, logout }: { user: AppUser; branding: BrandingSettings; logout: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   const initials = user.name.split(' ').slice(-2).map(x => x[0]).join('');
@@ -64,25 +66,25 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
                 <Box size={18} /> Sổ tài sản
               </NavLink>
 
-              <NavLink to="/entitlements" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/entitlements" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Key size={18} /> Tài sản số
               </NavLink>
-              <NavLink to="/vendors" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/vendors" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Building2 size={18} /> Nhà cung cấp
               </NavLink>
-              <NavLink to="/risks" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/risks" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <ShieldAlert size={18} /> Đánh giá rủi ro
               </NavLink>
               <NavLink to="/master-data" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Settings size={18} /> Danh mục
               </NavLink>
-              <NavLink to="/scanner" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/scanner" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <QrCode size={18} /> Barcode / QR
               </NavLink>
-              <NavLink to="/inventory" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/inventory" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <ClipboardList size={18} /> Kiểm kê
               </NavLink>
-              <NavLink to="/imports" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <NavLink to="/imports" onClick={(e) => { alert('Chức năng đang trong quá trình phát triển'); }} className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <FileSpreadsheet size={18} /> Nhập hàng loạt
               </NavLink>
               <NavLink to="/incidents" className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}>
@@ -125,6 +127,10 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"><Search size={20} /></button>
+            
+            <button onClick={() => setIsSettingsOpen(true)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              <Settings size={20} />
+            </button>
             <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 relative">
               <Bell size={20} />
               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white dark:ring-gray-900" />
@@ -136,6 +142,7 @@ export function MainLayout({ user, branding, logout }: { user: AppUser; branding
           <Outlet />
         </main>
       </div>
+      <ChangePasswordModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }

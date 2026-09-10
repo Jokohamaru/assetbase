@@ -40,7 +40,7 @@ export function CreateIncidentModal({ onClose, onSuccess, prefilledAsset }: Prop
       const fetchAssets = async () => {
         try {
           const res = await apiClient.get('/assets', { params: { my: true } });
-          setMyAssets(res.data.data.items || []);
+          setMyAssets(Array.isArray(res.data.data) ? res.data.data : (res.data.data.items || []));
         } catch (e) {}
       };
       fetchAssets();

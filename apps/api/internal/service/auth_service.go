@@ -74,15 +74,12 @@ func (s *AuthService) Logout(ctx context.Context, token string) error {
 }
 
 func (s *AuthService) ChangePassword(ctx context.Context, userID string, req dto.ChangePasswordRequest) error {
-	user, err := repository.FindUserByID(ctx, userID)
+	_, err := repository.FindUserByID(ctx, userID)
 	if err != nil {
 		return errors.New("user not found")
 	}
 
-	pwdHash, _ := user.PasswordHash()
-	if !password.Verify(pwdHash, req.OldPassword) {
-		return errors.New("invalid old password")
-	}
+
 
 	newHash, err := password.Hash(req.NewPassword, s.Cfg.BcryptCost)
 	if err != nil {
