@@ -66,20 +66,20 @@ func SeedDemoData(cfg *config.Config) {
 		db.User.Department.Link(db.Department.ID.Equals(hrDept.ID)),
 	).Exec(ctx)
 
-	// 4. Create Asset Statuses
+	// 4. Create Asset Statuses (phải khớp với các code được dùng trong Backend/Frontend)
 	statusInUse, _ := Client.AssetStatus.CreateOne(
 		db.AssetStatus.Code.Set("IN_USE"),
 		db.AssetStatus.Name.Set("Đang sử dụng"),
-		db.AssetStatus.Color.Set("#10B981"), // Green
+		db.AssetStatus.Color.Set("#10B981"),
 		db.AssetStatus.SortOrder.Set(1),
 		db.AssetStatus.IsAssignable.Set(false),
 		db.AssetStatus.IsDeployable.Set(false),
 	).Exec(ctx)
 
-	statusInStorage, _ := Client.AssetStatus.CreateOne(
-		db.AssetStatus.Code.Set("IN_STORAGE"),
-		db.AssetStatus.Name.Set("Trong kho"),
-		db.AssetStatus.Color.Set("#3B82F6"), // Blue
+	statusReady, _ := Client.AssetStatus.CreateOne(
+		db.AssetStatus.Code.Set("READY"),
+		db.AssetStatus.Name.Set("Sẵn sàng cấp phát"),
+		db.AssetStatus.Color.Set("#3B82F6"),
 		db.AssetStatus.SortOrder.Set(2),
 		db.AssetStatus.IsAssignable.Set(true),
 		db.AssetStatus.IsDeployable.Set(true),
@@ -88,8 +88,26 @@ func SeedDemoData(cfg *config.Config) {
 	statusMaintenance, _ := Client.AssetStatus.CreateOne(
 		db.AssetStatus.Code.Set("MAINTENANCE"),
 		db.AssetStatus.Name.Set("Đang bảo trì"),
-		db.AssetStatus.Color.Set("#F59E0B"), // Amber
+		db.AssetStatus.Color.Set("#F59E0B"),
 		db.AssetStatus.SortOrder.Set(3),
+		db.AssetStatus.IsAssignable.Set(false),
+		db.AssetStatus.IsDeployable.Set(false),
+	).Exec(ctx)
+
+	_, _ = Client.AssetStatus.CreateOne(
+		db.AssetStatus.Code.Set("BROKEN"),
+		db.AssetStatus.Name.Set("Hỏng - Chờ thanh lý"),
+		db.AssetStatus.Color.Set("#EF4444"),
+		db.AssetStatus.SortOrder.Set(4),
+		db.AssetStatus.IsAssignable.Set(false),
+		db.AssetStatus.IsDeployable.Set(false),
+	).Exec(ctx)
+
+	_, _ = Client.AssetStatus.CreateOne(
+		db.AssetStatus.Code.Set("RETIRED"),
+		db.AssetStatus.Name.Set("Đã thanh lý"),
+		db.AssetStatus.Color.Set("#9CA3AF"),
+		db.AssetStatus.SortOrder.Set(5),
 		db.AssetStatus.IsAssignable.Set(false),
 		db.AssetStatus.IsDeployable.Set(false),
 	).Exec(ctx)
@@ -140,13 +158,13 @@ func SeedDemoData(cfg *config.Config) {
 		).Exec(ctx)
 	}
 
-	// Asset 3: Monitor in Storage
-	if monitorCat != nil && statusInStorage != nil && financeDept != nil {
+	// Asset 3: Monitor READY (sẵn sàng cấp phát)
+	if monitorCat != nil && statusReady != nil && financeDept != nil {
 		Client.Asset.CreateOne(
 			db.Asset.AssetTag.Set("AST-MN-001"),
 			db.Asset.Name.Set("LG UltraSharp 27 inch"),
 			db.Asset.Category.Link(db.AssetCategory.ID.Equals(monitorCat.ID)),
-			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusInStorage.ID)),
+			db.Asset.Status.Link(db.AssetStatus.ID.Equals(statusReady.ID)),
 			db.Asset.Department.Link(db.Department.ID.Equals(financeDept.ID)),
 		).Exec(ctx)
 	}
