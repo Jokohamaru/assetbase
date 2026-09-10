@@ -276,3 +276,129 @@ func (h *MasterDataHandler) DeletePerson(c *gin.Context) {
 	}
 	response.Success(c, gin.H{"message": "Xóa nhân viên thành công"})
 }
+
+func (h *MasterDataHandler) UpdateDepartment(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	res, err := h.Service.UpdateDepartment(c.Request.Context(), id, req.Code, req.Name)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
+func (h *MasterDataHandler) DeleteDepartment(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.Service.DeleteDepartment(c.Request.Context(), id); err != nil {
+		if err.Error() == "DEPARTMENT_IN_USE_BY_PEOPLE" {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa phòng ban đang có nhân viên")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Xóa thành công"})
+}
+
+func (h *MasterDataHandler) UpdateLocation(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+		Type string `json:"type"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	res, err := h.Service.UpdateLocation(c.Request.Context(), id, req.Code, req.Name, req.Type)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
+func (h *MasterDataHandler) DeleteLocation(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.Service.DeleteLocation(c.Request.Context(), id); err != nil {
+		if err.Error() == "LOCATION_IN_USE_BY_ASSETS" || err.Error() == "LOCATION_IN_USE_BY_PEOPLE" || err.Error() == "LOCATION_IN_USE_BY_WAREHOUSE" {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa vị trí đang được sử dụng")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Xóa thành công"})
+}
+
+func (h *MasterDataHandler) UpdateManufacturer(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	res, err := h.Service.UpdateManufacturer(c.Request.Context(), id, req.Name)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
+func (h *MasterDataHandler) DeleteManufacturer(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.Service.DeleteManufacturer(c.Request.Context(), id); err != nil {
+		if err.Error() == "MANUFACTURER_IN_USE_BY_MODELS" {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa NSX đã có dòng máy")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Xóa thành công"})
+}
+
+func (h *MasterDataHandler) UpdateWarehouse(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Code        string  `json:"code"`
+		Name        string  `json:"name"`
+		LocationId  *string `json:"locationId"`
+		Description string  `json:"description"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	res, err := h.Service.UpdateWarehouse(c.Request.Context(), id, req.Code, req.Name, req.LocationId, req.Description)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
+func (h *MasterDataHandler) DeleteWarehouse(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.Service.DeleteWarehouse(c.Request.Context(), id); err != nil {
+		if err.Error() == "WAREHOUSE_IN_USE_BY_INVENTORIES" {
+			response.Error(c, http.StatusBadRequest, "Không thể xóa kho đã có phiên kiểm kê")
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"message": "Xóa thành công"})
+}

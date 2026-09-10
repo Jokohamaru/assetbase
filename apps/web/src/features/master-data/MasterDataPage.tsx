@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Building2, MapPin, Tags, Box, Plus, Pencil, Trash2, User, Users } from 'lucide-react';
-import { useDepartments, useLocations, useCategories, useManufacturers, useUsers, usePeople } from '../../hooks/useMasterData';
+import { useDepartments, useLocations, useCategories, useManufacturers, useUsers, usePeople, useWarehouses } from '../../hooks/useMasterData';
 import { UserFormModal } from './UserFormModal';
 import { CategoryFormModal } from './CategoryFormModal';
 import { DeleteCategoryModal } from './DeleteCategoryModal';
 import { DeleteUserModal } from './DeleteUserModal';
 import { PersonFormModal } from './PersonFormModal';
 import { DeletePersonModal } from './DeletePersonModal';
+import { DepartmentFormModal, DepartmentDeleteModal } from './DepartmentModals';
+import { LocationFormModal, LocationDeleteModal } from './LocationModals';
+import { ManufacturerFormModal, ManufacturerDeleteModal } from './ManufacturerModals';
+import { WarehouseFormModal, WarehouseDeleteModal } from './WarehouseModals';
 
-type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users' | 'people';
+
+type Tab = 'departments' | 'locations' | 'categories' | 'manufacturers' | 'users' | 'people' | 'warehouses';
 
 export function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<Tab>('departments');
@@ -19,10 +24,18 @@ export function MasterDataPage() {
   const [isPersonModalOpen, setIsPersonModalOpen] = useState(false);
   const [selectedPersonForDelete, setSelectedPersonForDelete] = useState<any>(null);
   const [selectedPersonForEdit, setSelectedPersonForEdit] = useState<any>(null);
+  const [selectedEntityForEdit, setSelectedEntityForEdit] = useState<any>(null);
+  const [selectedEntityForDelete, setSelectedEntityForDelete] = useState<any>(null);
+  const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isManufacturerModalOpen, setIsManufacturerModalOpen] = useState(false);
+  const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+
   
   const { data: departments = [], isLoading: isLoadingDept } = useDepartments();
   const { data: locations = [], isLoading: isLoadingLoc } = useLocations();
   const { data: categories = [], isLoading: isLoadingCat } = useCategories();
+  const { data: warehouses = [], isLoading: isLoadingWarehouses } = useWarehouses();
   const { data: manufacturers = [], isLoading: isLoadingMan } = useManufacturers();
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
   const { data: people = [], isLoading: isLoadingPeople } = usePeople();
@@ -32,6 +45,7 @@ export function MasterDataPage() {
     { id: 'locations', label: 'Kho & Vị trí', icon: MapPin, data: locations, isLoading: isLoadingLoc },
     { id: 'categories', label: 'Nhóm tài sản', icon: Tags, data: categories, isLoading: isLoadingCat },
     { id: 'manufacturers', label: 'Nhà sản xuất', icon: Box, data: manufacturers, isLoading: isLoadingMan },
+    { id: 'warehouses', label: 'Kho', icon: Box, data: warehouses, isLoading: isLoadingWarehouses },
     { id: 'users', label: 'Tài khoản', icon: User, data: users, isLoading: isLoadingUsers },
     { id: 'people', label: 'Nhân sự', icon: Users, data: people, isLoading: isLoadingPeople },
   ] as const;
@@ -79,16 +93,18 @@ export function MasterDataPage() {
               {currentTab?.label}
             </h2>
             <button 
+              
               onClick={() => {
-                if (activeTab === 'users') {
-                  setIsUserModalOpen(true);
-                } else if (activeTab === 'categories') {
-                  setIsCategoryModalOpen(true);
-                } else if (activeTab === 'people') {
-                  setSelectedPersonForEdit(null);
-                  setIsPersonModalOpen(true);
-                }
+                setSelectedEntityForEdit(null);
+                if (activeTab === 'users') setIsUserModalOpen(true);
+                else if (activeTab === 'categories') setIsCategoryModalOpen(true);
+                else if (activeTab === 'people') { setSelectedPersonForEdit(null); setIsPersonModalOpen(true); }
+                else if (activeTab === 'departments') setIsDepartmentModalOpen(true);
+                else if (activeTab === 'locations') setIsLocationModalOpen(true);
+                else if (activeTab === 'manufacturers') setIsManufacturerModalOpen(true);
+                else if (activeTab === 'warehouses') setIsWarehouseModalOpen(true);
               }}
+
               className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
               <Plus size={16} /> Thêm mới
             </button>
@@ -226,21 +242,26 @@ export function MasterDataPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <button className="text-gray-400 hover:text-indigo-600 transition-colors">
+                            
+                            <button 
+                              onClick={() => {
+                                setSelectedEntityForEdit(item);
+                                if (activeTab === 'departments') setIsDepartmentModalOpen(true);
+                                else if (activeTab === 'locations') setIsLocationModalOpen(true);
+                                else if (activeTab === 'manufacturers') setIsManufacturerModalOpen(true);
+                                else if (activeTab === 'warehouses') setIsWarehouseModalOpen(true);
+                              }}
+                              className="text-gray-400 hover:text-indigo-600 transition-colors"
+                            >
                               <Pencil size={16} />
                             </button>
-                            {activeTab === 'categories' ? (
-                              <button 
-                                onClick={() => setSelectedCategoryForDelete(item)}
-                                className="text-gray-400 hover:text-red-600 transition-colors"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            ) : (
-                              <button className="text-gray-400 hover:text-red-600 transition-colors">
-                                <Trash2 size={16} />
-                              </button>
-                            )}
+                            <button 
+                              onClick={() => setSelectedEntityForDelete(item)}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+
                           </div>
                         </td>
                       </tr>
@@ -263,11 +284,21 @@ export function MasterDataPage() {
         onClose={() => setIsCategoryModalOpen(false)}
       />
       
-      <DeleteCategoryModal 
-        isOpen={selectedCategoryForDelete !== null}
-        onClose={() => setSelectedCategoryForDelete(null)}
-        category={selectedCategoryForDelete}
-      />
+      
+      <DepartmentFormModal isOpen={isDepartmentModalOpen} onClose={() => {setIsDepartmentModalOpen(false); setSelectedEntityForEdit(null);}} entity={selectedEntityForEdit} />
+      <DepartmentDeleteModal isOpen={selectedEntityForDelete !== null && activeTab === 'departments'} onClose={() => setSelectedEntityForDelete(null)} entity={selectedEntityForDelete} />
+      
+      <LocationFormModal isOpen={isLocationModalOpen} onClose={() => {setIsLocationModalOpen(false); setSelectedEntityForEdit(null);}} entity={selectedEntityForEdit} />
+      <LocationDeleteModal isOpen={selectedEntityForDelete !== null && activeTab === 'locations'} onClose={() => setSelectedEntityForDelete(null)} entity={selectedEntityForDelete} />
+      
+      <ManufacturerFormModal isOpen={isManufacturerModalOpen} onClose={() => {setIsManufacturerModalOpen(false); setSelectedEntityForEdit(null);}} entity={selectedEntityForEdit} />
+      <ManufacturerDeleteModal isOpen={selectedEntityForDelete !== null && activeTab === 'manufacturers'} onClose={() => setSelectedEntityForDelete(null)} entity={selectedEntityForDelete} />
+      
+      <WarehouseFormModal isOpen={isWarehouseModalOpen} onClose={() => {setIsWarehouseModalOpen(false); setSelectedEntityForEdit(null);}} entity={selectedEntityForEdit} />
+      <WarehouseDeleteModal isOpen={selectedEntityForDelete !== null && activeTab === 'warehouses'} onClose={() => setSelectedEntityForDelete(null)} entity={selectedEntityForDelete} />
+      
+      <DeleteCategoryModal isOpen={selectedEntityForDelete !== null && activeTab === 'categories'} onClose={() => setSelectedEntityForDelete(null)} category={selectedEntityForDelete} />
+
 
       <DeleteUserModal 
         isOpen={selectedUserForDelete !== null}

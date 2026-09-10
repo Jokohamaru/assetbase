@@ -180,9 +180,9 @@ func (s *MasterDataService) CreatePerson(ctx context.Context, employeeCode, full
 	fullNameOp := db.Person.FullName.Set(fullName)
 	departmentOp := db.Person.Department.Link(db.Department.ID.Equals(departmentId))
 	var ops []db.PersonSetParam
-	
+
 	ops = append(ops, db.Person.Status.Set(db.RecordStatusActive))
-	
+
 	if email != "" {
 		ops = append(ops, db.Person.Email.Set(email))
 	}
@@ -285,4 +285,124 @@ func (s *MasterDataService) DeletePerson(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s *MasterDataService) UpdateDepartment(ctx context.Context, id, code, name string) (*db.DepartmentModel, error) {
+	var ops []db.DepartmentSetParam
+	if code != "" {
+		ops = append(ops, db.Department.Code.Set(code))
+	}
+	if name != "" {
+		ops = append(ops, db.Department.Name.Set(name))
+	}
+	return database.Client.Department.FindUnique(db.Department.ID.Equals(id)).Update(ops...).Exec(ctx)
+}
+
+func (s *MasterDataService) DeleteDepartment(ctx context.Context, id string) error {
+	// Check if people or assets are assigned
+	people, err := database.Client.Person.FindMany(db.Person.DepartmentID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(people) > 0 {
+		return errors.New("DEPARTMENT_IN_USE_BY_PEOPLE")
+	}
+
+	_, err = database.Client.Department.FindUnique(db.Department.ID.Equals(id)).Delete().Exec(ctx)
+	return err
+}
+
+func (s *MasterDataService) UpdateLocation(ctx context.Context, id, code, name, locType string) (*db.LocationModel, error) {
+	var ops []db.LocationSetParam
+	if code != "" {
+		ops = append(ops, db.Location.Code.Set(code))
+	}
+	if name != "" {
+		ops = append(ops, db.Location.Name.Set(name))
+	}
+	if locType != "" {
+		ops = append(ops, db.Location.Type.Set(locType))
+	}
+	return database.Client.Location.FindUnique(db.Location.ID.Equals(id)).Update(ops...).Exec(ctx)
+}
+
+func (s *MasterDataService) DeleteLocation(ctx context.Context, id string) error {
+	assets, err := database.Client.Asset.FindMany(db.Asset.LocationID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(assets) > 0 {
+		return errors.New("LOCATION_IN_USE_BY_ASSETS")
+	}
+
+	people, err := database.Client.Person.FindMany(db.Person.LocationID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(people) > 0 {
+		return errors.New("LOCATION_IN_USE_BY_PEOPLE")
+	}
+
+	warehouses, err := database.Client.Warehouse.FindMany(db.Warehouse.LocationID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(warehouses) > 0 {
+		return errors.New("LOCATION_IN_USE_BY_WAREHOUSE")
+	}
+
+	_, err = database.Client.Location.FindUnique(db.Location.ID.Equals(id)).Delete().Exec(ctx)
+	return err
+}
+
+func (s *MasterDataService) UpdateManufacturer(ctx context.Context, id, name string) (*db.ManufacturerModel, error) {
+	var ops []db.ManufacturerSetParam
+	if name != "" {
+		ops = append(ops, db.Manufacturer.Name.Set(name))
+	}
+	return database.Client.Manufacturer.FindUnique(db.Manufacturer.ID.Equals(id)).Update(ops...).Exec(ctx)
+}
+
+func (s *MasterDataService) DeleteManufacturer(ctx context.Context, id string) error {
+	models, err := database.Client.ProductModel.FindMany(db.ProductModel.ManufacturerID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(models) > 0 {
+		return errors.New("MANUFACTURER_IN_USE_BY_MODELS")
+	}
+
+	_, err = database.Client.Manufacturer.FindUnique(db.Manufacturer.ID.Equals(id)).Delete().Exec(ctx)
+	return err
+}
+
+func (s *MasterDataService) UpdateWarehouse(ctx context.Context, id, code, name string, locationId *string, description string) (*db.WarehouseModel, error) {
+	var ops []db.WarehouseSetParam
+	if code != "" {
+		ops = append(ops, db.Warehouse.Code.Set(code))
+	}
+	if name != "" {
+		ops = append(ops, db.Warehouse.Name.Set(name))
+	}
+	if locationId != nil {
+		ops = append(ops, db.Warehouse.Location.Link(db.Location.ID.Equals(*locationId)))
+	}
+	if description != "" {
+		ops = append(ops, db.Warehouse.Description.Set(description))
+	}
+
+	return database.Client.Warehouse.FindUnique(db.Warehouse.ID.Equals(id)).Update(ops...).Exec(ctx)
+}
+
+func (s *MasterDataService) DeleteWarehouse(ctx context.Context, id string) error {
+	inventories, err := database.Client.InventorySession.FindMany(db.InventorySession.ScopeWarehouseID.Equals(id)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	if len(inventories) > 0 {
+		return errors.New("WAREHOUSE_IN_USE_BY_INVENTORIES")
+	}
+
+	_, err = database.Client.Warehouse.FindUnique(db.Warehouse.ID.Equals(id)).Delete().Exec(ctx)
+	return err
 }

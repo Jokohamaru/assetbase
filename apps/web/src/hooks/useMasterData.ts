@@ -175,3 +175,91 @@ export function useDeletePerson() {
     }
   });
 }
+
+export function useCreateDepartment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => (await apiClient.post('/admin/departments', data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] })
+  });
+}
+export function useUpdateDepartment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => (await apiClient.put(`/admin/departments/${id}`, data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] })
+  });
+}
+export function useDeleteDepartment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.delete(`/admin/departments/${id}`)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] })
+  });
+}
+
+export function useCreateLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => (await apiClient.post('/admin/locations', data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['locations'] })
+  });
+}
+export function useUpdateLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => (await apiClient.put(`/admin/locations/${id}`, data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['locations'] })
+  });
+}
+export function useDeleteLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.delete(`/admin/locations/${id}`)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['locations'] })
+  });
+}
+
+export function useCreateManufacturer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => (await apiClient.post('/admin/manufacturers', data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['manufacturers'] })
+  });
+}
+export function useUpdateManufacturer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => (await apiClient.put(`/admin/manufacturers/${id}`, data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['manufacturers'] })
+  });
+}
+export function useDeleteManufacturer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.delete(`/admin/manufacturers/${id}`)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['manufacturers'] })
+  });
+}
+
+export function useCreateWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => (await apiClient.post('/admin/warehouses', data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['warehouses'] })
+  });
+}
+export function useUpdateWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => (await apiClient.put(`/admin/warehouses/${id}`, data)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['warehouses'] })
+  });
+}
+export function useDeleteWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => (await apiClient.delete(`/admin/warehouses/${id}`)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['warehouses'] })
+  });
+}

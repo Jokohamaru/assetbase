@@ -218,9 +218,13 @@ func main() {
 			{
 				admin.GET("/departments", masterDataHandler.ListDepartments)
 				admin.POST("/departments", masterDataHandler.CreateDepartment)
+				admin.PUT("/departments/:id", masterDataHandler.UpdateDepartment)
+				admin.DELETE("/departments/:id", masterDataHandler.DeleteDepartment)
 
 				admin.GET("/locations", masterDataHandler.ListLocations)
 				admin.POST("/locations", masterDataHandler.CreateLocation)
+				admin.PUT("/locations/:id", masterDataHandler.UpdateLocation)
+				admin.DELETE("/locations/:id", masterDataHandler.DeleteLocation)
 
 				admin.GET("/categories", masterDataHandler.ListCategories)
 				admin.POST("/categories", masterDataHandler.CreateCategory)
@@ -228,12 +232,16 @@ func main() {
 
 				admin.GET("/manufacturers", masterDataHandler.ListManufacturers)
 				admin.POST("/manufacturers", masterDataHandler.CreateManufacturer)
+				admin.PUT("/manufacturers/:id", masterDataHandler.UpdateManufacturer)
+				admin.DELETE("/manufacturers/:id", masterDataHandler.DeleteManufacturer)
 
 				admin.GET("/models", masterDataHandler.ListModels)
 				admin.POST("/models", masterDataHandler.CreateModel)
 
 				admin.GET("/warehouses", masterDataHandler.ListWarehouses)
 				admin.POST("/warehouses", masterDataHandler.CreateWarehouse)
+				admin.PUT("/warehouses/:id", masterDataHandler.UpdateWarehouse)
+				admin.DELETE("/warehouses/:id", masterDataHandler.DeleteWarehouse)
 
 				admin.GET("/asset-statuses", masterDataHandler.ListAssetStatuses)
 				admin.GET("/people", masterDataHandler.ListPeople)
