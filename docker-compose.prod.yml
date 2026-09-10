@@ -26,6 +26,7 @@ services:
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
       BCRYPT_COST: ${BCRYPT_COST}
       PRISMA_CLIENT_ENGINE_DIR: /app
+      ASSETBASE_DEMO_SEED: ${ASSETBASE_DEMO_SEED}
     volumes:
       - prod_uploads:/app/uploads
     networks:
