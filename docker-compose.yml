@@ -34,6 +34,7 @@ services:
       CORS_ORIGIN: "http://localhost:3000"
       INITIAL_ADMIN_PASSWORD: "Admin@12345"
       BCRYPT_COST: "10"
+      ASSETBASE_DEMO_SEED: "true"
     volumes:
       - backend_uploads:/app/uploads
     depends_on:

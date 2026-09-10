@@ -30,6 +30,11 @@ func main() {
 	// Seed Initial Admin
 	database.SeedInitialAdmin(cfg)
 
+	// Seed mock data if enabled
+	if cfg.DemoSeed {
+		database.SeedDemoData(cfg)
+	}
+
 	// Setup Gin
 	mode := os.Getenv("GIN_MODE")
 	if mode == "release" {
